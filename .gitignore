@@ -1,0 +1,10 @@
+# Pythonのキャッシュ（不要なもの）
+__pycache__/
+*.py[cod]
+
+# PyTorchの重みファイル（GitHubに上げない）
+*.pth
+*.pt
+
+# その他、実験データが巨大なら追加
+# data/*.npy
