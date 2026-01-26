@@ -15,11 +15,11 @@ import random
 g=3*10**8 #波の速度(光速)
 l=30 #伝送線路長
 T=l/g #周期
-num_node=10 #ノードの数
-num_edge=9 #枝の数
+num_node=50 #ノードの数
+num_edge=49 #枝の数
 
-data_step=10 #dataのstep数
-volt_step=10
+data_step=50 #dataのstep数
+volt_step=50
 
 
 #接続行列の指定
