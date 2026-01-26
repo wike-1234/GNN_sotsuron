@@ -5,11 +5,26 @@ import random
 from torch_geometric.loader import DataLoader
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+import os
+import argparse
 
 from config import GlobalParams
 from models.GNN_model import AttentionGCN
 from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
+
+
+parser=argparse.ArgumentParser()
+parser.add_argument('--load_file',type=str,default=GlobalParams.load_file)
+parser.add_argument('--seed',type=int,default=GlobalParams.seed)
+parser.add_argument('--mask_ratio',type=int,default=GlobalParams.mask_ratio)
+
+args=parser.parse_args()
+
+GlobalParams.load_file=args.load_file
+GlobalParams.seed=args.seed
+GlobalParams.mask_ratio=args.mask_ratio
+
 
 sub_params=GlobalParams()
 ds=dataset.get_datset(sub_params)
@@ -169,10 +184,12 @@ for epoch in range(params.num_epoch):
     avg_MSE_score=MSE_score/len(test_loader)
     test_MSE_history.append(avg_MSE_score)
 
-    print(f"Epoch {epoch+1}: Total Loss={avg_train_loss:.4f} (Test: {avg_test_loss:.4f})")
+    #print(f"Epoch {epoch+1}: Total Loss={avg_train_loss:.4f} (Test: {avg_test_loss:.4f})")
 
 #推移結果をplot
+save_dir=r"/home/ike/research/results/sort_later"
 #損失関数
+plt.figure()
 plt.plot(train_loss_history, label='Train Loss')
 plt.plot(test_loss_history, label='Test Loss')
 plt.yscale('log')
@@ -181,16 +198,24 @@ plt.xlabel("epoch")
 plt.ylabel("loss")
 plt.legend()
 plt.grid(True, which="both", ls="--")
-plt.show()
+filename=f"loss_curve_{params.load_file}_normalGNN_seed{params.seed}_mask{params.mask_ratio}.png"
+filepath = os.path.join(save_dir, filename)
+plt.savefig(filepath)
+plt.close()
 #正答率
+plt.figure()
 plt.plot(train_acc_history,label='Train Accuracy')
 plt.plot(test_acc_history,label='Test Accuracy')
 plt.title("Accuracy Curve (Normal GNN)")
 plt.xlabel("epoch")
 plt.ylabel("accuracy")
 plt.legend()
-plt.show()
+filename=f"acc_curve_{params.load_file}_normalGNN_seed{params.seed}_mask{params.mask_ratio}.png"
+filepath = os.path.join(save_dir, filename)
+plt.savefig(filepath)
+plt.close()
 #MSE
+plt.figure()
 plt.plot(train_MSE_history, label='Train MSE')
 plt.plot(test_MSE_history, label='Test MSE')
 plt.yscale('log')
@@ -199,14 +224,17 @@ plt.xlabel("epoch")
 plt.ylabel("MSE")
 plt.legend()
 plt.grid(True, which="both", ls="--")
-plt.show()
+filename=f"MSE_curve_{params.load_file}_normalGNN_seed{params.seed}_mask{params.mask_ratio}.png"
+filepath = os.path.join(save_dir, filename)
+plt.savefig(filepath)
+plt.close()
 
 
 
 # 1. 保存ファイル名をデータセット名に基づいて自動生成
 # 例: params.load_file が "data.dataset1" なら "model_dataset1.pth" になる
 dataset_name = params.load_file.split('.')[-1] 
-save_path = f'model_{dataset_name}_normalGCN_seed{params.seed}.pth' 
+save_path = f'model_{dataset_name}_normalGCN_seed{params.seed}_mask{params.mask_ratio}.pth' 
 
 # 2. モデルのパラメータ(state_dict)のみを保存
 # CPU/GPUどちらでも読み込めるように、一旦CPUに移して保存するのが一般的です
