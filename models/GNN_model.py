@@ -24,8 +24,8 @@ class AttentionGCN(MessagePassing):
 
         #回帰出力計算用lin層
         self.val_lin=nn.Linear(params.in_channels,params.volt_step)
-        nn.init.xavier_uniform_(self.att_lin.weight)
-        nn.init.zeros_(self.att_lin.bias)
+        nn.init.xavier_uniform_(self.val_lin.weight)
+        nn.init.zeros_(self.val_lin.bias)
 
 
     #propagateを呼ぶと内部でcollectが使われる-edge_weightも処理される

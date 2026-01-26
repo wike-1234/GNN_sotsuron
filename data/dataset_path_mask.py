@@ -70,7 +70,7 @@ V_source= np.column_stack(result_list)
 
 
 Z_variation=200 #電源位置のインピーダンスの大きさの種類
-mask_ratio=1 #mask_ratioに1つ毎に測定点を置く→num_nodeの約数のみ
+mask_ratio=2 #mask_ratioに1つ毎に測定点を置く→num_nodeの約数のみ
 mask_variation=1 #maskのバリエーションがmask_ratioと一致
 num_data=num_node*mask_variation*Z_variation #dataの数
 

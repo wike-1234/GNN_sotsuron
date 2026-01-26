@@ -18,7 +18,10 @@ class Hyperparams:
     lambda_balance=GlobalParams.lambda_balance
     load_file=GlobalParams.load_file
     seed=GlobalParams.seed
-    in_channels=ds.data_step
+    if (GlobalParams.load_file=="data.dataset_path") or(GlobalParams.load_file=="data.dataset_branch"):
+        in_channels=ds.data_step
+    elif (GlobalParams.load_file=="data.dataset_path_mask") or(GlobalParams.load_file=="data.dataset_branch_mask"):
+        in_channels=2*ds.data_step
     volt_step=ds.volt_step
     num_nodes=ds.num_node
     num_data=ds.num_data

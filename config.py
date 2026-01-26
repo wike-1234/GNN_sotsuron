@@ -3,7 +3,7 @@ from dataclasses import dataclass
 @dataclass
 class GlobalParams:
     #datasetを決定
-    load_file="data.dataset_path"
+    load_file="data.dataset_path_mask"
     out_channels=1 #出力は1channel
     lr=1e-3 #学習率
     num_epoch=500 #epoch数
