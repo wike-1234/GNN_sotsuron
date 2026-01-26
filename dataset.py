@@ -17,6 +17,7 @@ class Hyperparams:
     train_ratio=GlobalParams.train_ratio
     lambda_balance=GlobalParams.lambda_balance
     load_file=GlobalParams.load_file
+    seed=GlobalParams.seed
     in_channels=ds.data_step
     volt_step=ds.volt_step
     num_nodes=ds.num_node
