@@ -8,3 +8,5 @@ __pycache__/
 
 # その他、実験データが巨大なら追加
 # data/*.npy
+
+data/cache/

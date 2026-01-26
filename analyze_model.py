@@ -6,17 +6,49 @@ from torch_geometric.loader import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import os
+from dataclasses import dataclass
 
 from config import GlobalParams
 from models.GNN_model import AttentionGCN
 from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
-#--parameter--
-params=dataset.Hyperparams()
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-set_seed(params.seed)
+#--ファイル指定--
+npz_file="name.npz"
+pth_file="pth_path/name.pth"
+seed=5
 
+
+
+#loadするnpz指定
+save_dir="data/cache"
+save_path=os.path.join(save_dir,npz_file)
+ds=np.load(save_path,allow_pickle=True)
+
+@dataclass
+class Superparams:
+    out_channels=GlobalParams.out_channels
+    lr=GlobalParams.lr
+    num_epoch=GlobalParams.num_epoch
+    batch_size=GlobalParams.batch_size
+    train_ratio=GlobalParams.train_ratio
+    lambda_balance=GlobalParams.lambda_balance
+    mask_ratio=GlobalParams.mask_ratio
+    if ("mask" in npz_file):
+        in_channels=2*int(ds['data_step'])
+    else:
+        in_channels=int(ds['data_step'])
+    volt_step=int(ds['volt_step'])
+    num_nodes=int(ds['num_nodes'])
+    num_data=int(ds['num_data'])
+    B=ds['B']
+
+
+#--parameter--
+params=Superparams()
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+set_seed(seed)
 #originalの部分
 #特徴量毎のグラフ定義
 #kステップ目のデータ-k-hop目までつながった行列で定義
@@ -34,7 +66,7 @@ criterion_class=nn.CrossEntropyLoss()
 criterion_reg=nn.MSELoss()
 
 #data list作成
-data_list=dataset.create_torch_data_list(dataset.ds,params,model)
+data_list=dataset.create_torch_data_list(ds,params,model)
 #--train/test--
 indices=list(range(params.num_data))
 random.shuffle(indices)
@@ -138,7 +170,8 @@ def visualize_att_lin(model,params):
     plt.ylabel("Weight")
     plt.show()
 
-    print(f"Attention Linear Bias:{att_bias}")
+    print("=== Attention Linear Bias ===")
+    print(att_bias)
 
 def visualize_val_lin(model,params):
     with torch.no_grad():
@@ -160,8 +193,37 @@ def visualize_val_lin(model,params):
     plt.ylabel("Bias")
     plt.show()
 
+def cul_acc_and_MSE(model,test_loader,params):
+    model.eval()
+    total=0
+    correct=0
+    MSE_score=0
+    with torch.no_grad():
+        for batch in test_loader:
+            batch=batch.to(device)
+            pred ,node_pred= model(batch.x,batch.edge_index,batch.batch,params) 
+            y_reg=batch.y
+            if y_reg.dim() == 3: y_reg = y_reg.squeeze(1)
+
+            #回帰出力のloss
+            loss_reg = criterion_reg(pred, y_reg)
+
+            score_matrix=node_pred.view(-1,params.num_nodes)
+            pred_label=score_matrix.argmax(dim=1)
+            correct+=(pred_label==batch.target_idx).sum().item()
+            total+=batch.target_idx.size(0)
+
+            MSE_score+=loss_reg.item()
+    acc=correct/total
+    avg_MSE_score=MSE_score/len(test_loader)
+    print("=== Accuracy ===")
+    print(acc)
+    print("=== MSE ===")
+    print(avg_MSE_score)
+
 visualize_edge_weight(model,0,params)
 visualize_att_lin(model,params)
 visualize_val_lin(model,params)
 visualize_voltage_wave(model,test_loader,params)
+cul_acc_and_MSE(model,test_loader,params)
 
