@@ -11,4 +11,4 @@ class GlobalParams:
     train_ratio=0.8
     #loss=Loss_reg+lambda_balance*loss_class
     #回帰用lossとlabellossの割合
-    lambda_balance=0.5 
+    lambda_balance=0.1 

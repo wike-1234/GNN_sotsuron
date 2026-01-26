@@ -7,12 +7,13 @@ import matplotlib.pyplot as plt
 
 from config import GlobalParams
 from models.GNN_model import AttentionGCN
-from utils.graph_utils import hop_index, channel_edge_index
+from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--parameter--
 params=dataset.Hyperparams()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+set_seed(42)
 
 #originalの部分
 #特徴量毎のグラフ定義
