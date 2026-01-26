@@ -181,7 +181,7 @@ plt.show()
 # 1. 保存ファイル名をデータセット名に基づいて自動生成
 # 例: params.load_file が "data.dataset1" なら "model_dataset1.pth" になる
 dataset_name = params.load_file.split('.')[-1] 
-save_path = f'model_{dataset_name}_myGCN.pth' 
+save_path = f'model_{dataset_name}_myGCN_seed{params.seed}.pth' 
 
 # 2. モデルのパラメータ(state_dict)のみを保存
 # CPU/GPUどちらでも読み込めるように、一旦CPUに移して保存するのが一般的です

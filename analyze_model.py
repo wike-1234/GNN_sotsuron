@@ -9,12 +9,13 @@ import seaborn as sns
 
 from config import GlobalParams
 from models.GNN_model import AttentionGCN
-from utils.graph_utils import hop_index, channel_edge_index
+from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--parameter--
 params=dataset.Hyperparams()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+set_seed(params.seed)
 
 #originalの部分
 #特徴量毎のグラフ定義
@@ -50,7 +51,7 @@ test_loader=DataLoader(test_data,batch_size=params.batch_size,shuffle=True)
 
 
 #modelのロード
-model.load_state_dict(torch.load("model_path_no_mask.pth",map_location=torch.device('cpu')))
+model.load_state_dict(torch.load("model_dataset_path_myGCN.pth",map_location=torch.device('cpu')))
 print("load completed")
 
 model.eval()
@@ -119,10 +120,10 @@ def visualize_edge_weight(model,ch,params):
     #プロット
     plt.figure(figsize=(6,5))
     plt.imshow(A,cmap="coolwarm")
-    plt.colorbar(label=f"Edge Weight(Channel{ch})")
+    plt.colorbar(label=f"Edge Weight(Channel{ch+1})")
     plt.xlabel("To node")
     plt.ylabel("From node")
-    plt.title(f"Edge Weight(ch{ch})")
+    plt.title(f"Edge Weight(ch{ch+1})")
     plt.show()
 
 def visualize_att_lin(model,params):
