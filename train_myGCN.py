@@ -4,14 +4,38 @@ import torch.nn as nn
 import random
 from torch_geometric.loader import DataLoader
 import matplotlib.pyplot as plt
+from dataclasses import dataclass
 
 from config import GlobalParams
 from models.GNN_model import AttentionGCN
 from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
+sub_params=GlobalParams()
+ds=dataset.get_datset(sub_params)
+
+@dataclass
+class Superparams:
+    out_channels=GlobalParams.out_channels
+    lr=GlobalParams.lr
+    num_epoch=GlobalParams.num_epoch
+    batch_size=GlobalParams.batch_size
+    train_ratio=GlobalParams.train_ratio
+    lambda_balance=GlobalParams.lambda_balance
+    load_file=GlobalParams.load_file
+    seed=GlobalParams.seed
+    mask_ratio=GlobalParams.mask_ratio
+    if (GlobalParams.load_file=="data.dataset_path") or(GlobalParams.load_file=="data.dataset_branch"):
+        in_channels=int(ds['data_step'])
+    elif (GlobalParams.load_file=="data.dataset_path_mask") or(GlobalParams.load_file=="data.dataset_branch_mask"):
+        in_channels=2*int(ds['data_step'])
+    volt_step=int(ds['volt_step'])
+    num_nodes=int(ds['num_nodes'])
+    num_data=int(ds['num_data'])
+    B=ds['B']
+
 #--parameter--
-params=dataset.Hyperparams()
+params=Superparams()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 set_seed(params.seed)
 
@@ -32,7 +56,7 @@ criterion_class=nn.CrossEntropyLoss()
 criterion_reg=nn.MSELoss()
 
 #data list作成
-data_list=dataset.create_torch_data_list(dataset.ds,params,model)
+data_list=dataset.create_torch_data_list(ds,params,model)
 #--train/test--
 indices=list(range(params.num_data))
 random.shuffle(indices)
