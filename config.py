@@ -12,3 +12,4 @@ class GlobalParams:
     #loss=Loss_reg+lambda_balance*loss_class
     #回帰用lossとlabellossの割合
     lambda_balance=0.2 
+    seed=42 #randomのシード

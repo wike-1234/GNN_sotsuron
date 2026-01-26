@@ -1,5 +1,7 @@
 import numpy as np
 import torch
+import os
+import random
 
 #グラフに対し、各ノードからnum_hop-hop離れたグラフが全て繋がっているグラフを新規で定義
 def hop_index(num_hop,params):
@@ -71,3 +73,12 @@ def channel_edge_index(params,channel_edge_dict):
                 edge_mask[idx,ch_idx]=1
     
     return unique_edge_index,edge_mask
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic=True
+    torch.backends.cudnn.benchmark=False
+    os.environ['PYTHONHASHSEED']=str(seed)
