@@ -17,11 +17,9 @@ from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--ファイル指定--
-npz_file="data_data.dataset_path_mask_seed_5_mask5.npz"
-pth_file="pth_path_mask5/model_dataset_path_mask_myGCN_seed5_mask5.pth"
-seed=5
-
-
+npz_file="data_data.dataset_branch_seed_5_mask1.npz"
+pth_file="pth_branch/model_dataset_branch_myGCN_seed5.pth"
+seed=17
 
 #loadするnpz指定
 save_dir="data/cache"
