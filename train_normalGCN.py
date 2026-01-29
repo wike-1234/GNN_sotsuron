@@ -6,24 +6,11 @@ from torch_geometric.loader import DataLoader
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import os
-import argparse
 
 from config import GlobalParams
 from models.GNN_model import AttentionGCN
 from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
-
-
-parser=argparse.ArgumentParser()
-parser.add_argument('--load_file',type=str,default=GlobalParams.load_file)
-parser.add_argument('--seed',type=int,default=GlobalParams.seed)
-parser.add_argument('--mask_ratio',type=int,default=GlobalParams.mask_ratio)
-
-args=parser.parse_args()
-
-GlobalParams.load_file=args.load_file
-GlobalParams.seed=args.seed
-GlobalParams.mask_ratio=args.mask_ratio
 
 
 sub_params=GlobalParams()
