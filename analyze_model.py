@@ -17,8 +17,8 @@ from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--ファイル指定--
-npz_file="data_data.dataset_branch_mask_seed_5_mask2.npz"
-pth_file="pth_branch_mask2/model_dataset_branch_mask_myGCN_seed5_mask2.pth"
+npz_file="data_data.dataset_path_seed_5_mask1.npz"
+pth_file="pth_path/model_dataset_path_myGCN_seed5.pth"
 seed=5
 
 
@@ -37,7 +37,7 @@ class Superparams:
     train_ratio=GlobalParams.train_ratio
     lambda_balance=GlobalParams.lambda_balance
     mask_ratio=GlobalParams.mask_ratio
-    if ("mask" in npz_file):
+    if ("mask2" in npz_file) or ("mask5" in npz_file) or ("mask10" in npz_file):
         in_channels=2*int(ds['data_step'])
     else:
         in_channels=int(ds['data_step'])
@@ -296,7 +296,8 @@ def visualize_intermediate_representation(model,test_loader,params):
     att_top2_indices=att_sorted_indices[-2:][::-1]
 
     score_matrix=node_pred.view(-1,params.num_nodes)
-    pred_label=score_matrix.argmax(dim=1)+1
+    pred_label=score_matrix.argmax(dim=1)
+    label=pred_label[0].cpu().numpy()
 
     x=np.arange(1,params.num_nodes+1)
     h_no1=h_data[:,att_top2_indices[0]]
@@ -304,14 +305,14 @@ def visualize_intermediate_representation(model,test_loader,params):
 
     plt.figure()
     plt.bar(x,h_no1)
-    plt.title(f"Intermediate Representation(ch{att_top2_indices[0]}) - Predicted node:{pred_label}")
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[0]}) - Predicted node:{label}")
     plt.xlabel("nodes")
     plt.ylabel("value")
     plt.show()
     plt.close()
 
     plt.bar(x,h_no2)
-    plt.title(f"Intermediate Representation(ch{att_top2_indices[1]}) - Predicted node:{pred_label}")
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[1]}) - Predicted node:{label}")
     plt.xlabel("nodes")
     plt.ylabel("value")
     plt.show()
