@@ -8,9 +8,11 @@ import numpy as np
 import seaborn as sns
 import os
 from dataclasses import dataclass
+from torch_geometric.nn import MessagePassing, global_add_pool
+from torch_geometric.utils import softmax
+
 
 from config import GlobalParams
-from models.GNN_model import AttentionGCN
 from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
@@ -43,6 +45,56 @@ class Superparams:
     num_nodes=int(ds['num_nodes'])
     num_data=int(ds['num_data'])
     B=ds['B']
+
+
+class AttentionGCN(MessagePassing):
+    def __init__(self,params,union_edge_index,edge_mask):
+        super().__init__(aggr='add')
+        self.in_channels=params.in_channels
+        self.num_edges=union_edge_index.size(1)
+        self.num_unique_connection=self.num_edges
+
+        #Xavierの初期化
+        self.edge_weight_base=nn.Parameter(torch.empty(self.num_unique_connection,params.in_channels))
+        nn.init.xavier_uniform_(self.edge_weight_base)
+        self.register_buffer("union_edge_index",union_edge_index)
+        self.register_buffer("edge_mask",edge_mask)
+
+        #nodeの計算確率用Lin層
+        self.att_lin=nn.Linear(params.in_channels,params.out_channels)
+        nn.init.xavier_uniform_(self.att_lin.weight)
+        nn.init.zeros_(self.att_lin.bias)
+
+        #回帰出力計算用lin層
+        self.val_lin=nn.Linear(params.in_channels,params.volt_step)
+        nn.init.xavier_uniform_(self.val_lin.weight)
+        nn.init.zeros_(self.val_lin.bias)
+
+
+    #propagateを呼ぶと内部でcollectが使われる-edge_weightも処理される
+    def forward(self,x,edge_index,batch_index,params):
+        #message-passing部分
+        num_graphs = x.size(0) // params.num_nodes
+        w1=self.edge_mask*self.edge_weight_base
+        batch_w1=w1.repeat(num_graphs,1)
+        h=self.propagate(edge_index,x=x,edge_weight=batch_w1)
+        
+        #確率
+        score=self.att_lin(h)
+        attention_weights=softmax(score,batch_index)
+        
+        #回帰出力のための補正用lin層
+        node_values=self.val_lin(h)
+
+        #attention_weightsを確立として各nodeにかけ，node方向に集約して電圧源予測
+        weighted_values=attention_weights*node_values
+        output=global_add_pool(weighted_values,batch_index)
+        
+        return output,score,h
+
+    def message(self,x_j,edge_weight):
+        return edge_weight*x_j
+
 
 
 #--parameter--
@@ -98,7 +150,7 @@ def visualize_voltage_wave(model,test_loader,params):
     with torch.no_grad():
         # pred_val: 回帰予測値
         batch=batch.to(device)
-        pred_val, _ = model(batch.x, batch.edge_index, batch.batch,params)
+        pred_val, _ ,_= model(batch.x, batch.edge_index, batch.batch,params)
 
     # 2. サンプルを選択 (例: バッチ内の 0番目のデータ)
     sample_idx = 0
@@ -109,7 +161,7 @@ def visualize_voltage_wave(model,test_loader,params):
     target_node = batch.target_idx[sample_idx].item()
 
     # 3. 棒グラフの準備
-    x = np.arange(len(actual_data))  # X軸のラベル位置 (0, 1, 2, ...)
+    x = np.arange(1,len(actual_data)+1)  # X軸のラベル位置 (0, 1, 2, ...)
     width = 0.35                     # 棒の太さ
 
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -122,7 +174,7 @@ def visualize_voltage_wave(model,test_loader,params):
 
     # 5. ラベルやタイトルの設定
     ax.set_ylabel('Voltage')
-    ax.set_xlabel('Channel / Step Index')
+    ax.set_xlabel('Step')
     ax.set_title(f'Prediction Comparison (Target Node: {target_node})')
     ax.set_xticks(x)             # 全ての目盛りを表示
     ax.legend()                  # 凡例を表示
@@ -152,6 +204,8 @@ def visualize_edge_weight(model,ch,params):
     #プロット
     plt.figure(figsize=(6,5))
     plt.imshow(A,cmap="coolwarm")
+    plt.xticks(ticks=np.arange(N), labels=np.arange(1, N + 1))
+    plt.yticks(ticks=np.arange(N), labels=np.arange(1, N + 1))
     plt.colorbar(label=f"Edge Weight(Channel{ch+1})")
     plt.xlabel("To node")
     plt.ylabel("From node")
@@ -159,7 +213,7 @@ def visualize_edge_weight(model,ch,params):
     plt.show()
 
 def visualize_att_lin(model,params):
-    x=np.arange(0,params.in_channels)
+    x=np.arange(1,params.in_channels+1)
     with torch.no_grad():
         att_weight=model.att_lin.weight.cpu().numpy().flatten()
         att_bias=model.att_lin.bias.cpu().numpy().flatten()
@@ -186,7 +240,7 @@ def visualize_val_lin(model,params):
     plt.show()
 
     plt.figure(figsize=(6,5))
-    x=np.arange(len(val_bias))
+    x=np.arange(1,len(val_bias)+1)
     plt.bar(x,val_bias)
     plt.title("Value Linear Bias")
     plt.xlabel("Out Channels")
@@ -201,7 +255,7 @@ def cul_acc_and_MSE(model,test_loader,params):
     with torch.no_grad():
         for batch in test_loader:
             batch=batch.to(device)
-            pred ,node_pred= model(batch.x,batch.edge_index,batch.batch,params) 
+            pred ,node_pred,_= model(batch.x,batch.edge_index,batch.batch,params) 
             y_reg=batch.y
             if y_reg.dim() == 3: y_reg = y_reg.squeeze(1)
 
@@ -221,9 +275,43 @@ def cul_acc_and_MSE(model,test_loader,params):
     print("=== MSE ===")
     print(avg_MSE_score)
 
+def visualize_intermediate_representation(model,test_loader,params):
+    model.eval()
+    batch=next(iter(test_loader))
+    with torch.no_grad():
+        batch=batch.to(device)
+        _,_,h=model(batch.x,batch.edge_index,batch.batch,params)
+        att_weight=model.lin.weight.cpu().numpy().flatten()
+    
+    sample_idx=0
+    h_data=h[sample_idx].cpu().numpy()
+
+    att_sorted_indices=np.argsort(np.abs(att_weight))
+    att_top2_indices=att_sorted_indices[-2:][::-1]
+
+    x=np.arange(0,params.num_nodes)
+    h_no1=h_data[:,att_top2_indices[0]]
+    h_no2=h_data[:,att_top2_indices[1]]
+
+    plt.figure()
+    plt.bar(x,h_no1)
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[0]})")
+    plt.xlabel("nodes")
+    plt.ylabel("value")
+    plt.show()
+    plt.close()
+
+    plt.bar(x,h_no2)
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[1]})")
+    plt.xlabel("nodes")
+    plt.ylabel("value")
+    plt.show()
+    plt.close()
+
+
 visualize_edge_weight(model,0,params)
 visualize_att_lin(model,params)
 visualize_val_lin(model,params)
 visualize_voltage_wave(model,test_loader,params)
 cul_acc_and_MSE(model,test_loader,params)
-
+visualize_intermediate_representation(model,test_loader,params)

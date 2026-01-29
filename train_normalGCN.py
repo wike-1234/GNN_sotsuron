@@ -171,10 +171,9 @@ for epoch in range(params.num_epoch):
     avg_MSE_score=MSE_score/len(test_loader)
     test_MSE_history.append(avg_MSE_score)
 
-    #print(f"Epoch {epoch+1}: Total Loss={avg_train_loss:.4f} (Test: {avg_test_loss:.4f})")
+    print(f"Epoch {epoch+1}: Total Loss={avg_train_loss:.4f} (Test: {avg_test_loss:.4f})")
 
 #推移結果をplot
-save_dir=r"/home/ike/research/results/sort_later"
 #損失関数
 plt.figure()
 plt.plot(train_loss_history, label='Train Loss')
@@ -185,9 +184,7 @@ plt.xlabel("epoch")
 plt.ylabel("loss")
 plt.legend()
 plt.grid(True, which="both", ls="--")
-filename=f"loss_curve_{params.load_file}_normalGNN_seed{params.seed}_mask{params.mask_ratio}.png"
-filepath = os.path.join(save_dir, filename)
-plt.savefig(filepath)
+plt.show()
 plt.close()
 #正答率
 plt.figure()
@@ -197,9 +194,7 @@ plt.title("Accuracy Curve (Normal GNN)")
 plt.xlabel("epoch")
 plt.ylabel("accuracy")
 plt.legend()
-filename=f"acc_curve_{params.load_file}_normalGNN_seed{params.seed}_mask{params.mask_ratio}.png"
-filepath = os.path.join(save_dir, filename)
-plt.savefig(filepath)
+plt.show()
 plt.close()
 #MSE
 plt.figure()
@@ -211,9 +206,7 @@ plt.xlabel("epoch")
 plt.ylabel("MSE")
 plt.legend()
 plt.grid(True, which="both", ls="--")
-filename=f"MSE_curve_{params.load_file}_normalGNN_seed{params.seed}_mask{params.mask_ratio}.png"
-filepath = os.path.join(save_dir, filename)
-plt.savefig(filepath)
+plt.show()
 plt.close()
 
 
