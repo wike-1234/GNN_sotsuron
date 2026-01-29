@@ -105,8 +105,13 @@ set_seed(seed)
 #特徴量毎のグラフ定義
 #kステップ目のデータ-k-hop目までつながった行列で定義
 structure_dict={}
-for node in range(params.in_channels):
-    structure_dict[node]=hop_index(node+1,params)
+if "my" in pth_file:
+    for node in range(params.in_channels):
+        structure_dict[node]=hop_index(node+1,params)
+elif "normal" in pth_file:
+    common_hop=hop_index(1,params)
+    for node in range(params.in_channels):
+        structure_dict[node]=common_hop    
 
 union_index,union_mask=channel_edge_index(params,structure_dict)
 
@@ -284,7 +289,8 @@ def visualize_intermediate_representation(model,test_loader,params):
         att_weight=model.att_lin.weight.cpu().numpy().flatten()
     
     sample_idx=0
-    h_data=h[sample_idx].cpu().numpy()
+    node_mask=(batch.batch==sample_idx).cpu.numpy()
+    h_data=h.cpu().numpy()[node_mask]
 
     att_sorted_indices=np.argsort(np.abs(att_weight))
     att_top2_indices=att_sorted_indices[-2:][::-1]
