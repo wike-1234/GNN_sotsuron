@@ -285,7 +285,7 @@ def visualize_intermediate_representation(model,test_loader,params):
     batch=next(iter(test_loader))
     with torch.no_grad():
         batch=batch.to(device)
-        _,_,h=model(batch.x,batch.edge_index,batch.batch,params)
+        _,node_pred,h=model(batch.x,batch.edge_index,batch.batch,params)
         att_weight=model.att_lin.weight.cpu().numpy().flatten()
     
     sample_idx=0
@@ -295,20 +295,23 @@ def visualize_intermediate_representation(model,test_loader,params):
     att_sorted_indices=np.argsort(np.abs(att_weight))
     att_top2_indices=att_sorted_indices[-2:][::-1]
 
-    x=np.arange(0,params.num_nodes)
+    score_matrix=node_pred.view(-1,params.num_nodes)
+    pred_label=score_matrix.argmax(dim=1)+1
+
+    x=np.arange(1,params.num_nodes+1)
     h_no1=h_data[:,att_top2_indices[0]]
     h_no2=h_data[:,att_top2_indices[1]]
 
     plt.figure()
     plt.bar(x,h_no1)
-    plt.title(f"Intermediate Representation(ch{att_top2_indices[0]})")
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[0]}) - Predicted node:{pred_label}")
     plt.xlabel("nodes")
     plt.ylabel("value")
     plt.show()
     plt.close()
 
     plt.bar(x,h_no2)
-    plt.title(f"Intermediate Representation(ch{att_top2_indices[1]})")
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[1]}) - Predicted node:{pred_label}")
     plt.xlabel("nodes")
     plt.ylabel("value")
     plt.show()
