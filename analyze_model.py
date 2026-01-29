@@ -289,7 +289,7 @@ def visualize_intermediate_representation(model,test_loader,params):
         att_weight=model.att_lin.weight.cpu().numpy().flatten()
     
     sample_idx=0
-    node_mask=(batch.batch==sample_idx).cpu.numpy()
+    node_mask=(batch.batch==sample_idx).cpu().numpy()
     h_data=h.cpu().numpy()[node_mask]
 
     att_sorted_indices=np.argsort(np.abs(att_weight))
