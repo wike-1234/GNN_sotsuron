@@ -17,8 +17,8 @@ from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--ファイル指定--
-npz_file="name.npz"
-pth_file="pth_path/name.pth"
+npz_file="data_data.dataset_branch_mask_seed_5_mask2.npz"
+pth_file="pth_branch_mask2/model_dataset_branch_mask_myGCN_seed5_mask2.pth"
 seed=5
 
 
@@ -135,7 +135,7 @@ test_loader=DataLoader(test_data,batch_size=params.batch_size,shuffle=True)
 
 
 #modelのロード
-model.load_state_dict(torch.load("model_dataset_path_myGCN.pth",map_location=torch.device('cpu')))
+model.load_state_dict(torch.load(pth_file,map_location=torch.device('cpu')))
 print("load completed")
 
 model.eval()
@@ -281,7 +281,7 @@ def visualize_intermediate_representation(model,test_loader,params):
     with torch.no_grad():
         batch=batch.to(device)
         _,_,h=model(batch.x,batch.edge_index,batch.batch,params)
-        att_weight=model.lin.weight.cpu().numpy().flatten()
+        att_weight=model.att_lin.weight.cpu().numpy().flatten()
     
     sample_idx=0
     h_data=h[sample_idx].cpu().numpy()
