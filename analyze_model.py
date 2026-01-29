@@ -17,8 +17,8 @@ from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--ファイル指定--
-npz_file="data_data.dataset_path_seed_5_mask1.npz"
-pth_file="pth_path/model_dataset_path_myGCN_seed5.pth"
+npz_file="data_data.dataset_path_mask_seed_100_mask2.npz"
+pth_file="pth_path_mask2/model_dataset_path_mask_normalGCN_seed100.pth"
 seed=5
 
 
@@ -297,7 +297,7 @@ def visualize_intermediate_representation(model,test_loader,params):
 
     score_matrix=node_pred.view(-1,params.num_nodes)
     pred_label=score_matrix.argmax(dim=1)
-    label=pred_label[0].cpu().numpy()
+    label=pred_label[0].cpu().numpy()+1
 
     x=np.arange(1,params.num_nodes+1)
     h_no1=h_data[:,att_top2_indices[0]]
@@ -305,23 +305,23 @@ def visualize_intermediate_representation(model,test_loader,params):
 
     plt.figure()
     plt.bar(x,h_no1)
-    plt.title(f"Intermediate Representation(ch{att_top2_indices[0]}) - Predicted node:{label}")
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[0]+1}) - Predicted node:{label}")
     plt.xlabel("nodes")
     plt.ylabel("value")
     plt.show()
     plt.close()
 
     plt.bar(x,h_no2)
-    plt.title(f"Intermediate Representation(ch{att_top2_indices[1]}) - Predicted node:{label}")
+    plt.title(f"Intermediate Representation(ch{att_top2_indices[1]+1}) - Predicted node:{label}")
     plt.xlabel("nodes")
     plt.ylabel("value")
     plt.show()
     plt.close()
 
 
-visualize_edge_weight(model,0,params)
-visualize_att_lin(model,params)
-visualize_val_lin(model,params)
-visualize_voltage_wave(model,test_loader,params)
+#visualize_edge_weight(model,0,params)
+#visualize_att_lin(model,params)
+#visualize_val_lin(model,params)
+#visualize_voltage_wave(model,test_loader,params)
 cul_acc_and_MSE(model,test_loader,params)
-visualize_intermediate_representation(model,test_loader,params)
+#visualize_intermediate_representation(model,test_loader,params)
