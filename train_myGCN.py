@@ -26,6 +26,7 @@ class Superparams:
     lambda_balance=GlobalParams.lambda_balance
     load_file=GlobalParams.load_file
     seed=GlobalParams.seed
+    seed_for_torch=GlobalParams.seed_for_torch
     mask_ratio=GlobalParams.mask_ratio
     if (GlobalParams.load_file=="data.dataset_path") or(GlobalParams.load_file=="data.dataset_branch"):
         in_channels=int(ds['data_step'])
@@ -39,7 +40,6 @@ class Superparams:
 #--parameter--
 params=Superparams()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-set_seed(params.seed)
 
 #originalの部分
 #特徴量毎のグラフ定義
@@ -51,12 +51,16 @@ for node in range(params.in_channels):
 union_index,union_mask=channel_edge_index(params,structure_dict)
 
 #--model定義--
+#weight用のseed値を固定
+torch.manual_seed(params.seed_for_torch)
+torch.cuda.manual_seed(params.seed_for_torch)
 model=AttentionGCN(params,union_index,union_mask)
 model=model.to(device)
 optimizer=torch.optim.Adam(model.parameters(),lr=params.lr,weight_decay=1e-4)
 criterion_class=nn.CrossEntropyLoss()
 criterion_reg=nn.MSELoss()
 
+set_seed(params.seed)
 #data list作成
 data_list=dataset.create_torch_data_list(ds,params,model)
 #--train/test--
@@ -70,7 +74,9 @@ test_indices=indices[train_size:]
 train_data=[data_list[i] for i in train_indices]
 test_data=[data_list[i] for i in test_indices]
 
-train_loader=DataLoader(train_data,batch_size=params.batch_size,shuffle=True)
+g=torch.Generator()
+g.manual_seed(params.seed)
+train_loader=DataLoader(train_data,batch_size=params.batch_size,shuffle=True,generator=g)
 test_loader=DataLoader(test_data,batch_size=params.batch_size,shuffle=True)
 
 #--推移をみるもの--
@@ -209,7 +215,7 @@ plt.show()
 # 1. 保存ファイル名をデータセット名に基づいて自動生成
 # 例: params.load_file が "data.dataset1" なら "model_dataset1.pth" になる
 dataset_name = params.load_file.split('.')[-1] 
-save_path = f'model_{dataset_name}_myGCN_seed{params.seed}_mask{params.mask_ratio}.pth' 
+save_path = f'model_{dataset_name}_myGCN_seed{params.seed}_mask{params.mask_ratio}_weight_seed{params.seed_for_torch}.pth' 
 
 # 2. モデルのパラメータ(state_dict)のみを保存
 # CPU/GPUどちらでも読み込めるように、一旦CPUに移して保存するのが一般的です

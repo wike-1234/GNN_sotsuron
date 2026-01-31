@@ -3,7 +3,7 @@ from dataclasses import dataclass
 @dataclass
 class GlobalParams:
     #datasetを決定
-    load_file="data.dataset_branch_mask"
+    load_file="data.dataset_path"
     out_channels=1 #出力は1channel
     lr=1e-3 #学習率
     num_epoch=500 #epoch数
@@ -13,4 +13,5 @@ class GlobalParams:
     #回帰用lossとlabellossの割合
     lambda_balance=0.2 
     seed=42 #randomのシード
-    mask_ratio=2 #maskなしのときは1に
+    seed_for_torch=17 #重み初期化用のseed値
+    mask_ratio=1 #maskなしのときは1に
