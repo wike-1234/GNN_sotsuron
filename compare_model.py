@@ -21,7 +21,7 @@ import dataset
 npz_file="data_data.dataset_path_seed_42_mask1.npz"
 pth_file_1="pth_compare/model_dataset_path_myGCN_seed42_mask1_weight_seed5.pth"
 pth_file_2="pth_compare/model_dataset_path_myGCN_seed42_mask1_weight_seed17.pth"
-seed=42
+seed=17
 
 #loadするnpz指定
 save_dir="data/cache"

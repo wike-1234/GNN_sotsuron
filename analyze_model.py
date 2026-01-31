@@ -17,9 +17,9 @@ from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--ファイル指定--
-npz_file="data_data.dataset_branch_mask_seed_100_mask10.npz"
-pth_file="pth_branch_mask10/model_dataset_branch_mask_normalGCN_seed100_mask10.pth"
-seed=100
+npz_file="data_data.dataset_path_seed_42_mask1.npz"
+pth_file="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
+seed=42
 
 #loadするnpz指定
 save_dir="data/cache"
@@ -309,6 +309,7 @@ def visualize_intermediate_representation(model,test_loader,params):
     plt.show()
     plt.close()
 
+    plt.figure()
     plt.bar(x,h_no2)
     plt.title(f"Intermediate Representation(ch{att_top2_indices[1]+1}) - Predicted node:{label}")
     plt.xlabel("nodes")
@@ -318,8 +319,8 @@ def visualize_intermediate_representation(model,test_loader,params):
 
 
 #visualize_edge_weight(model,0,params)
-#visualize_att_lin(model,params)
+visualize_att_lin(model,params)
 #visualize_val_lin(model,params)
 #visualize_voltage_wave(model,test_loader,params)
-cul_acc_and_MSE(model,test_loader,params)
-#visualize_intermediate_representation(model,test_loader,params)
+#cul_acc_and_MSE(model,test_loader,params)
+visualize_intermediate_representation(model,test_loader,params)
