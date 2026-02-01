@@ -17,8 +17,8 @@ from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--ファイル指定--
-npz_file="data_data.dataset_path_seed_42_mask1.npz"
-pth_file="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
+npz_file="data_data.dataset_branch_mask_seed_100_mask10.npz"
+pth_file="pth_branch_mask10/model_dataset_branch_mask_myGCN_seed100_mask10.pth"
 seed=100
 
 #loadするnpz指定
@@ -324,10 +324,10 @@ def visualize_intermediate_representation(model,test_loader,params):
     plt.show()
     plt.close()
 
-visualize_edge_weight(model,0,params)
-visualize_edge_weight(model,1,params)
-visualize_att_lin(model,params)
-visualize_val_lin(model,params)
-visualize_voltage_wave(model,test_loader,params)
+#visualize_edge_weight(model,0,params)
+#visualize_edge_weight(model,1,params)
+#visualize_att_lin(model,params)
+#visualize_val_lin(model,params)
+#visualize_voltage_wave(model,test_loader,params)
 cul_acc_and_MSE(model,test_loader,params)
-visualize_intermediate_representation(model,test_loader,params)
+#visualize_intermediate_representation(model,test_loader,params)
