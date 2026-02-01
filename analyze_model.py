@@ -17,8 +17,8 @@ from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
 #--ファイル指定--
-npz_file="data_data.dataset_branch_mask_seed_100_mask10.npz"
-pth_file="pth_branch_mask10/model_dataset_branch_mask_normalGCN_seed100_mask10.pth"
+npz_file="data_data.dataset_path_seed_42_mask1.npz"
+pth_file="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
 seed=100
 
 #loadするnpz指定
@@ -206,7 +206,7 @@ def visualize_edge_weight(model,ch,params):
     
     #プロット
     plt.figure(figsize=(6,5))
-    plt.imshow(A,cmap="coolwarm")
+    plt.imshow(A,cmap="coolwarm",vmin=-1,vmax=1)
     plt.xticks(ticks=np.arange(N), labels=np.arange(1, N + 1))
     plt.yticks(ticks=np.arange(N), labels=np.arange(1, N + 1))
     plt.colorbar(label=f"Edge Weight(Channel{ch+1})")
@@ -231,22 +231,25 @@ def visualize_att_lin(model,params):
     print(att_bias)
 
 def visualize_val_lin(model,params):
+    K=params.in_channels
     with torch.no_grad():
         val_weight=model.val_lin.weight.cpu().numpy()
         val_bias=model.val_lin.bias.cpu().numpy().flatten()
     #プロット
     plt.figure(figsize=(10,8))
     sns.heatmap(val_weight,cmap="coolwarm",center=0,annot=False)
+    plt.xticks(ticks=np.arange(1,K+1),labels=np.arange(1,K+1))
+    plt.yticks(ticks=np.arange(K),labels=np.arange(0,K))
     plt.title("Value Linear Weight")
     plt.xlabel("In Channels")
-    plt.ylabel("Out Channels")
+    plt.ylabel("Steps")
     plt.show()
 
     plt.figure(figsize=(6,5))
     x=np.arange(1,len(val_bias)+1)
     plt.bar(x,val_bias)
     plt.title("Value Linear Bias")
-    plt.xlabel("Out Channels")
+    plt.xlabel("Steps")
     plt.ylabel("Bias")
     plt.show()
 
@@ -316,10 +319,10 @@ def visualize_intermediate_representation(model,test_loader,params):
     plt.show()
     plt.close()
 
-
 #visualize_edge_weight(model,0,params)
+#visualize_edge_weight(model,1,params)
 #visualize_att_lin(model,params)
-#visualize_val_lin(model,params)
+visualize_val_lin(model,params)
 #visualize_voltage_wave(model,test_loader,params)
-cul_acc_and_MSE(model,test_loader,params)
+#cul_acc_and_MSE(model,test_loader,params)
 #visualize_intermediate_representation(model,test_loader,params)
