@@ -58,8 +58,14 @@ torch.cuda.manual_seed(seed)
 #kステップ目のデータ-k-hop目までつながった行列で定義
 structure_dict={}
 if "my" in pth_file_1:
-    for node in range(params.in_channels):
-        structure_dict[node]=hop_index(node+1,params)
+    if ("mask2" in npz_file) or ("mask5" in npz_file) or ("mask10" in npz_file):
+        for node in range(params.in_channels):
+            structure_dict[int(node/2)]=hop_index(node+1,params)
+    else:
+        for node in range(params.in_channels):
+            structure_dict[node]=hop_index(node+1,params)
+
+    union_index,union_mask=channel_edge_index(params,structure_dict)
 elif "normal" in pth_file_1:
     common_hop=hop_index(1,params)
     for node in range(params.in_channels):
