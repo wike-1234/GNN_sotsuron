@@ -45,10 +45,16 @@ set_seed(params.seed)
 #特徴量毎のグラフ定義
 #kステップ目のデータ-k-hop目までつながった行列で定義
 structure_dict={}
-for node in range(params.in_channels):
-    structure_dict[node]=hop_index(node+1,params)
+if (GlobalParams.load_file=="data.dataset_path") or(GlobalParams.load_file=="data.dataset_branch"):
+    for node in range(params.in_channels):
+        structure_dict[node]=hop_index(node+1,params)
 
-union_index,union_mask=channel_edge_index(params,structure_dict)
+    union_index,union_mask=channel_edge_index(params,structure_dict)
+elif (GlobalParams.load_file=="data.dataset_path_mask") or(GlobalParams.load_file=="data.dataset_branch_mask"):
+    for node in range(params.in_channels):
+        structure_dict[int(node/2)]=hop_index(node+1,params)
+
+    union_index,union_mask=channel_edge_index(params,structure_dict)
 
 #--model定義--
 model=AttentionGCN(params,union_index,union_mask)
