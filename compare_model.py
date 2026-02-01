@@ -65,7 +65,6 @@ if "my" in pth_file_1:
         for node in range(params.in_channels):
             structure_dict[node]=hop_index(node+1,params)
 
-    union_index,union_mask=channel_edge_index(params,structure_dict)
 elif "normal" in pth_file_1:
     common_hop=hop_index(1,params)
     for node in range(params.in_channels):
