@@ -18,10 +18,10 @@ from models.GNN_model import AttentionGCN
 import dataset
 
 #--ファイル指定--
-npz_file_1="data_data.dataset_path_seed_42_mask1.npz"
-npz_file_2="data_data.dataset_path_mask_seed_42_mask2.npz"
-pth_file_1="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
-pth_file_2="pth_path_mask2/model_dataset_path_mask_myGCN_seed42_mask2.pth"
+npz_file_1="data_data.dataset_branch_seed_42_mask1.npz"
+npz_file_2="data_data.dataset_branch_mask_seed_42_mask2.npz"
+pth_file_1="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
+pth_file_2="pth_branch_mask2/model_dataset_branch_mask_myGCN_seed42_mask2.pth"
 seed=42
 
 #loadするnpz指定
@@ -194,8 +194,8 @@ mask=((np.abs(out_A) > threshold) | (np.abs(out_B) > threshold))
 plt.figure(figsize=(6,6))
 plt.scatter(out_A[mask],out_B[mask],alpha=0.5,s=20)
 plt.plot([out_A.min(),out_A.max()], [out_A.min(),out_A.max()],'r--')
-plt.xlabel("Model A Predoction")
-plt.ylabel("Model B Prediction")
+plt.xlabel("Case A Predoction")
+plt.ylabel("Case B Prediction")
 plt.title("Prediction Comparison")
 plt.grid()
 plt.show()
