@@ -22,15 +22,17 @@ npz_file_1="data_data.dataset_path_seed_42_mask1.npz"
 npz_file_2="data_data.dataset_path_mask_seed_42_mask2.npz"
 pth_file_1="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
 pth_file_2="pth_path_mask2/model_dataset_path_mask_myGCN_seed42_mask2.pth"
-seed=70
+seed=42
 
 #loadするnpz指定
 save_dir="data/cache"
-save_path=os.path.join(save_dir,npz_file)
-ds=np.load(save_path,allow_pickle=True)
+save_path=os.path.join(save_dir,npz_file_1)
+ds_1=np.load(save_path,allow_pickle=True)
+save_path=os.path.join(save_dir,npz_file_2)
+ds_2=np.load(save_path,allow_pickle=True)
 
 @dataclass
-class Superparams:
+class Superparams_1:
     out_channels=GlobalParams.out_channels
     lr=GlobalParams.lr
     num_epoch=GlobalParams.num_epoch
@@ -38,18 +40,36 @@ class Superparams:
     train_ratio=GlobalParams.train_ratio
     lambda_balance=GlobalParams.lambda_balance
     mask_ratio=GlobalParams.mask_ratio
-    if ("mask2" in npz_file) or ("mask5" in npz_file) or ("mask10" in npz_file):
-        in_channels=2*int(ds['data_step'])
+    if ("mask2" in npz_file_1) or ("mask5" in npz_file_1) or ("mask10" in npz_file_1):
+        in_channels=2*int(ds_1['data_step'])
     else:
-        in_channels=int(ds['data_step'])
-    volt_step=int(ds['volt_step'])
-    num_nodes=int(ds['num_nodes'])
-    num_data=int(ds['num_data'])
-    B=ds['B']
+        in_channels=int(ds_1['data_step'])
+    volt_step=int(ds_1['volt_step'])
+    num_nodes=int(ds_1['num_nodes'])
+    num_data=int(ds_1['num_data'])
+    B=ds_1['B']
 
+@dataclass
+class Superparams_2:
+    out_channels=GlobalParams.out_channels
+    lr=GlobalParams.lr
+    num_epoch=GlobalParams.num_epoch
+    batch_size=GlobalParams.batch_size
+    train_ratio=GlobalParams.train_ratio
+    lambda_balance=GlobalParams.lambda_balance
+    mask_ratio=GlobalParams.mask_ratio
+    if ("mask2" in npz_file_2) or ("mask5" in npz_file_2) or ("mask10" in npz_file_2):
+        in_channels=2*int(ds_2['data_step'])
+    else:
+        in_channels=int(ds_2['data_step'])
+    volt_step=int(ds_2['volt_step'])
+    num_nodes=int(ds_2['num_nodes'])
+    num_data=int(ds_2['num_data'])
+    B=ds_2['B']
 
 #--parameter--
-params=Superparams()
+params_1=Superparams_1()
+params_2=Superparams_2
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 set_seed(seed)
 torch.manual_seed(seed)
@@ -57,16 +77,28 @@ torch.cuda.manual_seed(seed)
 #originalの部分
 #特徴量毎のグラフ定義
 #kステップ目のデータ-k-hop目までつながった行列で定義
-structure_dict={}
+structure_dict_1={}
 if "my" in pth_file_1:
-    for node in range(params.in_channels):
-        structure_dict[node]=hop_index(node+1,params)
+    for node in range(params_1.in_channels):
+        structure_dict_1[node]=hop_index(node+1,params_1)
 elif "normal" in pth_file_1:
-    common_hop=hop_index(1,params)
-    for node in range(params.in_channels):
-        structure_dict[node]=common_hop    
+    common_hop=hop_index(1,params_1)
+    for node in range(params_1.in_channels):
+        structure_dict_1[node]=common_hop    
 
-union_index,union_mask=channel_edge_index(params,structure_dict)
+union_index,union_mask=channel_edge_index(params_1,structure_dict_1)
+
+structure_dict_2={}
+if "my" in pth_file_2:
+    for node in range(params_2.in_channels):
+        structure_dict_2[node]=hop_index(node+2,params_1)
+elif "normal" in pth_file_1:
+    common_hop=hop_index(1,params_1)
+    for node in range(params_1.in_channels):
+        structure_dict_1[node]=common_hop    
+
+union_index,union_mask=channel_edge_index(params_1,structure_dict_1)
+
 
 #--model定義--
 model_A=AttentionGCN(params,union_index,union_mask)
