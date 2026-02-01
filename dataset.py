@@ -19,7 +19,15 @@ def get_datset(params):
 
     if os.path.exists(save_path):
         print(f"-- Loading dataset (seed:{seed}) --")
-        return np.load(save_path,allow_pickle=True)
+        with np.load(save_path,allow_pickle=True) as data:
+            loaded_dict={}
+            for key in data.files:
+                val=data[key]
+                if val.ndim==0:
+                    loaded_dict[key]=val.item()
+                else:
+                    loaded_dict[key]=val
+            return loaded_dict
         
     print(f">>>No dataset : seed{seed} -> make new dataset")
     if (params.load_file=="data.dataset_path"):
@@ -36,18 +44,18 @@ def get_datset(params):
 
 
 #mask_matrix：観測するnodeのindexが格納されている
-def intoroduce_mask(mask_matrix,data,params):
+def intoroduce_mask(data,params):
     num_data=len(data)
-    
-    all_indices=np.arange(params.num_nodes)
-    mask_idx=np.setdiff1d(all_indices,mask_matrix)
-    mask_layer=np.zeros(params.num_nodes)
+    num_nodes=data[0].shape[1]
+    all_indices=np.arange(num_nodes)
+    mask_idx=np.setdiff1d(all_indices,params.mask_matrix)
+    mask_layer=np.zeros(num_nodes)
     mask_layer[mask_idx]=1
 
     masked_data={}
     for i in range(num_data):
         masked_record=np.zeros_like(data[i])
-        masked_record[:,mask_matrix]=data[i][:,mask_matrix]
+        masked_record[:,params.mask_matrix]=data[i][:,params.mask_matrix]
 
         put_data=np.tile(np.zeros_like(data[i]),(2,1))
         put_data[0::2]=masked_record
@@ -60,9 +68,9 @@ def create_torch_data_list(ds,params,model):
     #--dataset作成--
     data_list=[]
 
-    dataset_dict=ds['dataset'].item()
-    volt_source_dict=ds['voltge_source'].item()
-    source_node_dict=ds['source_node_array'].item()
+    dataset_dict=ds['dataset']
+    volt_source_dict=ds['voltge_source']
+    source_node_dict=ds['source_node_array']
 
     for i in range(params.num_data):
         x=torch.tensor(dataset_dict[i].T,dtype=torch.float32)

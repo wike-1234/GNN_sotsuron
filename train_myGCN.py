@@ -15,7 +15,7 @@ import dataset
 
 sub_params=GlobalParams()
 ds=dataset.get_datset(sub_params)
-masked_dataset=dataset.intoroduce_mask(GlobalParams.mask_matrix,ds["dataset"],sub_params)
+masked_dataset=dataset.intoroduce_mask(ds["dataset"],sub_params)
 ds["dataset"]=masked_dataset
 @dataclass
 class Superparams:
@@ -208,7 +208,7 @@ plt.show()
 # 1. 保存ファイル名をデータセット名に基づいて自動生成
 # 例: params.load_file が "data.dataset1" なら "model_dataset1.pth" になる
 dataset_name = params.load_file.split('.')[-1] 
-save_path = f'model_{dataset_name}_myGCN_seed{params.seed}_mask{params.mask_ratio}.pth' 
+save_path = f'model_{dataset_name}_myGCN_seed{params.seed}_sparce_mask_1.pth' 
 
 # 2. モデルのパラメータ(state_dict)のみを保存
 # CPU/GPUどちらでも読み込めるように、一旦CPUに移して保存するのが一般的です
