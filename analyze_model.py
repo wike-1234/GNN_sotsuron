@@ -106,7 +106,7 @@ structure_dict={}
 if "my" in pth_file:
     if ("mask2" in npz_file) or ("mask5" in npz_file) or ("mask10" in npz_file):
         for node in range(params.in_channels):
-            structure_dict[int(node/2)]=hop_index(node+1,params)
+            structure_dict[node]=hop_index(int(node/2)+1,params)
     else:
         for node in range(params.in_channels):
             structure_dict[node]=hop_index(node+1,params)
