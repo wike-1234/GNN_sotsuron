@@ -52,7 +52,7 @@ if (GlobalParams.load_file=="data.dataset_path") or(GlobalParams.load_file=="dat
     union_index,union_mask=channel_edge_index(params,structure_dict)
 elif (GlobalParams.load_file=="data.dataset_path_mask") or(GlobalParams.load_file=="data.dataset_branch_mask"):
     for node in range(params.in_channels):
-        structure_dict[int(node/2)]=hop_index(node+1,params)
+        structure_dict[node]=hop_index(int(node/2)+1,params)
 
     union_index,union_mask=channel_edge_index(params,structure_dict)
 
