@@ -34,6 +34,28 @@ def get_datset(params):
     np.savez_compressed(save_path,**result)
     return np.load(save_path,allow_pickle=True)
 
+
+#mask_matrix：観測するnodeのindexが格納されている
+def intoroduce_mask(mask_matrix,data,params):
+    num_data=len(data)
+    
+    all_indices=np.arange(params.num_nodes)
+    mask_idx=np.setdiff1d(all_indices,mask_matrix)
+    mask_layer=np.zeros(params.num_nodes)
+    mask_layer[mask_idx]=1
+
+    masked_data={}
+    for i in range(num_data):
+        masked_record=np.zeros_like(data[i])
+        masked_record[:,mask_matrix]=data[i][:,mask_matrix]
+
+        put_data=np.tile(np.zeros_like(data[i]),(2,1))
+        put_data[0::2]=masked_record
+        put_data[1::2]=mask_layer
+        masked_data[i]=put_data
+    return masked_data
+
+
 def create_torch_data_list(ds,params,model):
     #--dataset作成--
     data_list=[]

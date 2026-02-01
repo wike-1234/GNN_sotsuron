@@ -15,7 +15,8 @@ import dataset
 
 sub_params=GlobalParams()
 ds=dataset.get_datset(sub_params)
-
+masked_dataset=dataset.intoroduce_mask(GlobalParams.mask_matrix,ds["dataset"],sub_params)
+ds["dataset"]=masked_dataset
 @dataclass
 class Superparams:
     out_channels=GlobalParams.out_channels
@@ -27,10 +28,8 @@ class Superparams:
     load_file=GlobalParams.load_file
     seed=GlobalParams.seed
     mask_ratio=GlobalParams.mask_ratio
-    if (GlobalParams.load_file=="data.dataset_path") or(GlobalParams.load_file=="data.dataset_branch"):
-        in_channels=int(ds['data_step'])
-    elif (GlobalParams.load_file=="data.dataset_path_mask") or(GlobalParams.load_file=="data.dataset_branch_mask"):
-        in_channels=2*int(ds['data_step'])
+    mask_matrix=GlobalParams.mask_matrix
+    in_channels=2*int(ds['data_step'])
     volt_step=int(ds['volt_step'])
     num_nodes=int(ds['num_nodes'])
     num_data=int(ds['num_data'])
