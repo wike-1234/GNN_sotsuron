@@ -90,27 +90,23 @@ for ch in range(params.in_channels):
 
 #Attention Linear
 with torch.no_grad():
-    att_weight=model.att_lin.weight.cpu().numpy().flatten()
+    W=model.att_lin.weight.cpu().numpy().flatten()
 
+A_stack=np.array([Adjacency_matrix[ch] for ch in range(params.in_channels)])
+Weighted_A=A_stack*W[:,None,None]
+Weighted_A=Weighted_A.transpose(2,1,0)
 N=params.num_nodes
 K=params.in_channels
-Op=np.zeros((N,N*K))
+Op=Weighted_A.reshape(N,N*K)
 
-for ch in range(K):
-    # 出力node：i
-    for i in range(N):
-        #入力node：j
-        for j in range(N):
-            a_weight=Adjacency_matrix[ch][j,i]
-            Op[i,j*K+ch]=a_weight*att_weight.flatten()
 
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(15,6))
 ax=sns.heatmap(Op,
                cmap="RdBu_r",
                center=0,
                cbar=True,
-               square=True,
-               linewidths=0.1,
+               square=False,
+               linewidths=0.0,
                linecolor='lightgray',
                cbar_kws={"label":"Coefficient Values"})
 
