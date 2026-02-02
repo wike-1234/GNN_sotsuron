@@ -19,7 +19,7 @@ import dataset
 #--ファイル指定--
 npz_file="data_data.dataset_branch_seed_42_mask1.npz"
 pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
-seed=100
+seed=42
 
 #loadするnpz指定
 save_dir="data/cache"
