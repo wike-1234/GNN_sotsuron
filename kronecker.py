@@ -10,8 +10,8 @@ from config import GlobalParams
 from utils.graph_utils import set_seed,hop_index,channel_edge_index
 from models.GNN_model import AttentionGCN
 #file指定
-pth_file="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
-npz_file="data_data.dataset_path_seed_42_mask1.npz"
+pth_file="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed17.pth"
+npz_file="data_data.dataset_branch_seed_42_mask1.npz"
 seed=42
 
 #loadするnpz指定
@@ -108,7 +108,7 @@ Op_focused=Op[:,start_col:end_col]
 
 H, W_mat = Op_focused.shape
 plt.figure(figsize=(12,12))
-v_max=np.percentile(np.abs(Op_focused))
+v_max=np.percentile(np.abs(Op_focused),99)
 ax=sns.heatmap(Op_focused,
                cmap="RdBu_r",
                center=0,
@@ -126,11 +126,11 @@ ax.set_xlabel(f"Input Feature Index (Node:{target_input_node+1})", fontsize=12)
 
 # X軸ラベル: 特徴量(チャンネル)のインデックス
 ax.set_xticks(np.arange(W_mat) + 0.5)
-ax.set_xticklabels([f"Ch {k}" for k in range(K)], rotation=45)
+ax.set_xticklabels([f"Ch {k+1}" for k in range(K)], rotation=45)
 
 # Y軸ラベル: 出力ノード番号 (数が多い場合は間引く)
 ax.set_yticks(np.arange(H) + 0.5)
-ax.set_yticklabels(np.arange(H), rotation=0)
+ax.set_yticklabels(np.arange(H)+1, rotation=0)
 
 plt.tight_layout()
 plt.show()
