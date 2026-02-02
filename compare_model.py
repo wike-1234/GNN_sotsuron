@@ -21,6 +21,7 @@ import dataset
 npz_file="data_data.dataset_branch_seed_42_mask1.npz"
 pth_file_1="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed5.pth"
 pth_file_2="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed17.pth"
+mask_ratio=1
 seed=42
 
 #loadするnpz指定
@@ -36,7 +37,7 @@ class Superparams:
     batch_size=GlobalParams.batch_size
     train_ratio=GlobalParams.train_ratio
     lambda_balance=GlobalParams.lambda_balance
-    mask_ratio=GlobalParams.mask_ratio
+    mask_ratio=mask_ratio
     if ("mask2" in npz_file) or ("mask5" in npz_file) or ("mask10" in npz_file):
         in_channels=2*int(ds['data_step'])
     else:

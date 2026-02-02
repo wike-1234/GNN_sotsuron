@@ -15,13 +15,16 @@ from torch_geometric.utils import softmax
 from config import GlobalParams
 from utils.graph_utils import hop_index, channel_edge_index,set_seed
 from models.GNN_model import AttentionGCN
+from torch.utils.data import Subset
 import dataset
 
 #--ファイル指定--
-npz_file_1="data_data.dataset_branch_seed_42_mask1.npz"
-npz_file_2="data_data.dataset_branch_mask_seed_42_mask2.npz"
-pth_file_1="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
-pth_file_2="pth_branch_mask2/model_dataset_branch_mask_myGCN_seed42_mask2.pth"
+npz_file_1="data_data.dataset_path_seed_42_mask1.npz"
+npz_file_2="data_data.dataset_path_mask_seed_42_mask2.npz"
+pth_file_1="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
+pth_file_2="pth_path_mask2/model_dataset_path_mask_myGCN_seed42_mask2.pth"
+mask_ratio_1=1
+mask_ratio_2=2
 seed=42
 
 #loadするnpz指定
@@ -39,7 +42,7 @@ class Superparams_1:
     batch_size=GlobalParams.batch_size
     train_ratio=GlobalParams.train_ratio
     lambda_balance=GlobalParams.lambda_balance
-    mask_ratio=GlobalParams.mask_ratio
+    mask_ratio=mask_ratio_1
     if ("mask2" in npz_file_1) or ("mask5" in npz_file_1) or ("mask10" in npz_file_1):
         in_channels=2*int(ds_1['data_step'])
     else:
@@ -57,7 +60,7 @@ class Superparams_2:
     batch_size=GlobalParams.batch_size
     train_ratio=GlobalParams.train_ratio
     lambda_balance=GlobalParams.lambda_balance
-    mask_ratio=GlobalParams.mask_ratio
+    mask_ratio=mask_ratio_2
     if ("mask2" in npz_file_2) or ("mask5" in npz_file_2) or ("mask10" in npz_file_2):
         in_channels=2*int(ds_2['data_step'])
     else:
@@ -69,7 +72,7 @@ class Superparams_2:
 
 #--parameter--
 params_1=Superparams_1()
-params_2=Superparams_2
+params_2=Superparams_2()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 set_seed(seed)
 torch.manual_seed(seed)
@@ -120,41 +123,27 @@ criterion_class=nn.CrossEntropyLoss()
 criterion_reg=nn.MSELoss()
 
 #data list作成
-data_list_1=dataset.create_torch_data_list(ds_1,params_1,model_A)
-#--train/test--
 indices=list(range(params_1.num_data))
 random.shuffle(indices)
-
 train_size=int(params_1.num_data*params_1.train_ratio)
-train_indices=indices[:train_size]
 test_indices=indices[train_size:]
 
-train_data=[data_list_1[i] for i in train_indices]
-test_data=[data_list_1[i] for i in test_indices]
-
-train_loader_1=DataLoader(train_data,batch_size=params_1.batch_size,shuffle=True)
-test_loader_1=DataLoader(test_data,batch_size=params_1.batch_size,shuffle=True)
-
+data_list_1=dataset.create_torch_data_list(ds_1,params_1,model_A)
 data_list_2=dataset.create_torch_data_list(ds_2,params_2,model_B)
-#--train/test--
-indices=list(range(params_2.num_data))
-random.shuffle(indices)
 
-train_size=int(params_2.num_data*params_2.train_ratio)
-train_indices=indices[:train_size]
-test_indices=indices[train_size:]
+subset_1 = Subset(data_list_1, test_indices)
+subset_2 = Subset(data_list_2, test_indices)
 
-train_data=[data_list_2[i] for i in train_indices]
-test_data=[data_list_2[i] for i in test_indices]
-
-train_loader_2=DataLoader(train_data,batch_size=params_2.batch_size,shuffle=True)
-test_loader_2=DataLoader(test_data,batch_size=params_2.batch_size,shuffle=True)
+test_loader_1=DataLoader(subset_1,batch_size=params_1.batch_size,shuffle=False)
+test_loader_2=DataLoader(subset_2,batch_size=params_2.batch_size,shuffle=False)
 
 #modelのロード
 model_A.load_state_dict(torch.load(pth_file_1,map_location=torch.device('cpu')))
 model_B.load_state_dict(torch.load(pth_file_2,map_location=torch.device('cpu')))
 print("load completed")
 
+model_A.eval()
+model_B.eval()
 # === att_linの重みを比較 ===
 weight_A=model_A.att_lin.weight.detach().cpu().numpy().flatten()
 weight_B=model_B.att_lin.weight.detach().cpu().numpy().flatten()
