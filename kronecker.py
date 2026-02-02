@@ -111,9 +111,9 @@ ax=sns.heatmap(Op,
                cbar_kws={"label":"Coefficient Values"})
 
 # タイトルと軸ラベル
-ax.set_title(f"GNN Linear Operator Visualization ($A \times W^T$)\nSize: {Op.shape}", fontsize=14)
-ax.set_ylabel("Output Node Index ($i$)", fontsize=12)
-ax.set_xlabel("Input Feature Index ($j \cdot K + k$)", fontsize=12)
+ax.set_title("GNN Linear Operator Visualization", fontsize=14)
+ax.set_ylabel("Output Node Index", fontsize=12)
+ax.set_xlabel("Input Feature Index", fontsize=12)
 
 # 視認性を上げるための区切り線とラベル
 # X軸: ノードごとの区切り
