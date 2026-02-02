@@ -92,7 +92,6 @@ for ch in range(params.in_channels):
 with torch.no_grad():
     att_weight=model.att_lin.weight.cpu().numpy().flatten()
 
-A_stack=
 N=params.num_nodes
 K=params.in_channels
 Op=np.zeros((N,N*K))
