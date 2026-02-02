@@ -99,11 +99,20 @@ N=params.num_nodes
 K=params.in_channels
 Op=Weighted_A.reshape(N,N*K)
 
+#dataが多すぎるのでinput_nodeを絞る
+target_input_node=0
 
-plt.figure(figsize=(15,6))
-ax=sns.heatmap(Op,
+start_col=target_input_node*K
+end_col=(target_input_node+1)*K
+Op_focused=Op[:,start_col:end_col]
+
+H, W_mat = Op_focused.shape
+plt.figure(figsize=(12,12))
+v_max=np.percentile(np.abs(Op_focused))
+ax=sns.heatmap(Op_focused,
                cmap="RdBu_r",
                center=0,
+               vmax=v_max,vmin=-v_max,
                cbar=True,
                square=False,
                linewidths=0.0,
@@ -111,24 +120,17 @@ ax=sns.heatmap(Op,
                cbar_kws={"label":"Coefficient Values"})
 
 # タイトルと軸ラベル
-ax.set_title("GNN Linear Operator Visualization", fontsize=14)
+ax.set_title(f"GNN Linear Operator Visualization (Input Node:{target_input_node+1})", fontsize=14)
 ax.set_ylabel("Output Node Index", fontsize=12)
-ax.set_xlabel("Input Feature Index", fontsize=12)
+ax.set_xlabel(f"Input Feature Index (Node:{target_input_node+1})", fontsize=12)
 
-# 視認性を上げるための区切り線とラベル
-# X軸: ノードごとの区切り
-for x in range(0, N * K + 1, K):
-    ax.axvline(x, color='black', linewidth=1.5)
+# X軸ラベル: 特徴量(チャンネル)のインデックス
+ax.set_xticks(np.arange(W_mat) + 0.5)
+ax.set_xticklabels([f"Ch {k}" for k in range(K)], rotation=45)
 
-# X軸ラベルをノード単位で表示
-tick_locs = np.arange(0, N * K, K) + K / 2
-tick_labels = [f"Node {j}" for j in range(N)]
-ax.set_xticks(tick_locs)
-ax.set_xticklabels(tick_labels, rotation=0)
-
-# Y軸: ノードごとの区切り（1行ごとですが、明示的に）
-for y in range(N + 1):
-    ax.axhline(y, color='black', linewidth=0.5)
+# Y軸ラベル: 出力ノード番号 (数が多い場合は間引く)
+ax.set_yticks(np.arange(H) + 0.5)
+ax.set_yticklabels(np.arange(H), rotation=0)
 
 plt.tight_layout()
 plt.show()
