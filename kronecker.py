@@ -11,7 +11,7 @@ from utils.graph_utils import set_seed,hop_index,channel_edge_index
 from models.GNN_model import AttentionGCN
 #file指定
 pth_file="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
-npz_file="data.dataset_path_seed42_mask1"
+npz_file="data_data.dataset_path_seed_42_mask1.npz"
 seed=42
 
 #loadするnpz指定
@@ -92,6 +92,7 @@ for ch in range(params.in_channels):
 with torch.no_grad():
     att_weight=model.att_lin.weight.cpu().numpy().flatten()
 
+A_stack=
 N=params.num_nodes
 K=params.in_channels
 Op=np.zeros((N,N*K))
