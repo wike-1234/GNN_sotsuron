@@ -10,8 +10,8 @@ from config import GlobalParams
 from utils.graph_utils import set_seed,hop_index,channel_edge_index
 from models.GNN_model import AttentionGCN
 #file指定
-pth_file="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed17.pth"
-npz_file="data_data.dataset_branch_seed_42_mask1.npz"
+pth_file="pth_branch_mask2/model_dataset_branch_mask_myGCN_seed5_mask2.pth"
+npz_file="data_data.dataset_branch_mask_seed_42_mask2.npz"
 seed=42
 
 #loadするnpz指定
@@ -100,7 +100,7 @@ K=params.in_channels
 Op=Weighted_A.reshape(N,N*K)
 
 #dataが多すぎるのでinput_nodeを絞る
-target_input_node=0
+target_input_node=1
 
 start_col=target_input_node*K
 end_col=(target_input_node+1)*K
