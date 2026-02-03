@@ -10,8 +10,8 @@ from config import GlobalParams
 from utils.graph_utils import set_seed,hop_index,channel_edge_index
 from models.GNN_model import AttentionGCN
 #file指定
-pth_file="pth_path/model_dataset_path_myGCN_seed42_mask1.pth"
-npz_file="data_data.dataset_path_seed_42_mask1.npz"
+pth_file="pth_path_mask10/model_dataset_path_mask_myGCN_seed42_mask10.pth"
+npz_file="data_data.dataset_path_mask_seed_42_mask10.npz"
 seed=42
 
 #dataが多すぎるのでinput_nodeを絞る
@@ -106,7 +106,8 @@ Op=Weighted_A.reshape(N,N*K)
 
 start_col=target_input_node*K
 end_col=(target_input_node+1)*K
-Op_focused=Op[:,start_col:end_col]
+Op_focused_all=Op[:,start_col:end_col]
+Op_focused=Op_focused_all[:,::params.mask_ratio]
 
 H, W_mat = Op_focused.shape
 plt.figure(figsize=(12,12))
@@ -121,14 +122,21 @@ ax=sns.heatmap(Op_focused,
                linecolor='lightgray',
                cbar_kws={"label":"Coefficient Values"})
 
+if "mask2" in pth_file:
+    case=1
+elif "mask5" in pth_file:
+    case=2
+elif "mask10" in pth_file:
+    case=3
+
 # タイトルと軸ラベル
-ax.set_title(f"GNN Linear Operator Visualization (Input Node:{target_input_node+1})", fontsize=14)
+ax.set_title(f"GNN Linear Operator Visualization (Input Node:{target_input_node+1}) - (Case {case})", fontsize=14)
 ax.set_ylabel("Output Node Index", fontsize=12)
 ax.set_xlabel(f"Input Feature Index (Node:{target_input_node+1})", fontsize=12)
 
 # X軸ラベル: 特徴量(チャンネル)のインデックス
 ax.set_xticks(np.arange(W_mat) + 0.5)
-ax.set_xticklabels([f"Ch {k+1}" for k in range(K)], rotation=45)
+ax.set_xticklabels([f"Ch {k+1}" for k in range(W_mat)], rotation=45)
 
 # Y軸ラベル: 出力ノード番号 (数が多い場合は間引く)
 ax.set_yticks(np.arange(H) + 0.5)
