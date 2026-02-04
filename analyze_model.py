@@ -324,6 +324,52 @@ def visualize_intermediate_representation(model,test_loader,params):
     plt.show()
     plt.close()
 
+def visualize_all_intermediate_representation(model,test_loader,params):
+    model.eval()
+    batch=next(iter(test_loader))
+    with torch.no_grad():
+        batch=batch.to(device)
+        _,node_pred,h=model(batch.x,batch.edge_index,batch.batch,params)
+        att_weight=model.att_lin.weight.cpu().numpy().flatten()
+    
+    sample_idx=0
+    node_mask=(batch.batch==sample_idx).cpu().numpy()
+    h_data=h.cpu().numpy()[node_mask]
+    score_matrix=node_pred.view(-1,params.num_nodes)
+    pred_label=score_matrix.argmax(dim=1)
+    label=pred_label[0].cpu().numpy()+1
+
+    N,C=h_data.shape
+    plt.figure(figsize=(12,12))
+    v_max=np.percentile(np.abs(h_data),99)
+    ax=sns.heatmap(h_data,
+               cmap="RdBu_r",
+               center=0,
+               vmax=v_max,vmin=-v_max,
+               cbar=True,
+               square=False,
+               linewidths=0.0,
+               linecolor='lightgray',
+               cbar_kws={"label":"Intermediate Representation"})
+
+    # タイトルと軸ラベル
+    ax.set_title(f"Intermediate Representation - Predicted Node : {label}", fontsize=14)
+    ax.set_ylabel("Node", fontsize=12)
+    ax.set_xlabel(f"Channel", fontsize=12)
+
+    # X軸ラベル: 特徴量(チャンネル)のインデックス
+    ax.set_xticks(np.arange(C) + 0.5)
+    ax.set_xticklabels([f"Ch {k+1}" for k in range(C)], rotation=45)
+
+    # Y軸ラベル: 出力ノード番号 (数が多い場合は間引く)
+    ax.set_yticks(np.arange(N) + 0.5)
+    ax.set_yticklabels(np.arange(N)+1, rotation=0)
+
+    plt.tight_layout()
+    plt.show()
+
+
+
 #visualize_edge_weight(model,0,params)
 #visualize_edge_weight(model,1,params)
 #visualize_att_lin(model,params)
@@ -331,3 +377,4 @@ visualize_val_lin(model,params)
 #visualize_voltage_wave(model,test_loader,params)
 cul_acc_and_MSE(model,test_loader,params)
 #visualize_intermediate_representation(model,test_loader,params)
+visualize_all_intermediate_representation(model,test_loader,params)
