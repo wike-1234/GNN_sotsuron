@@ -10,8 +10,8 @@ from config import GlobalParams
 from utils.graph_utils import set_seed,hop_index,channel_edge_index
 from models.GNN_model import AttentionGCN
 #file指定
-pth_file="pth_compare/model_dataset_path_myGCN_seed42_mask1_weight_seed17.pth"
-npz_file="data_data.dataset_path_seed_42_mask1.npz"
+pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
+npz_file="data_data.dataset_branch_seed_42_mask1.npz"
 seed=42
 
 #dataが多すぎるのでinput_nodeを絞る
