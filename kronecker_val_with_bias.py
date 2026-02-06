@@ -20,9 +20,11 @@ plt.rcParams.update({
 })
 
 #file指定
-pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
-#pth_file="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed17.pth"
-npz_file="data_data.dataset_path_seed_42_mask1.npz"
+#pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
+pth_file="pth_branch_mask5/model_dataset_branch_mask_myGCN_seed42_mask5.pth"
+#pth_file="pth_compare/model_dataset_path_myGCN_seed42_mask1_weight_seed17.pth"
+#npz_file="data_data.dataset_path_seed_42_mask1.npz"
+npz_file="data_data.dataset_path_mask_seed_42_mask2.npz"
 seed=42
 
 #dataが多すぎるのでinput_nodeを絞る
@@ -118,23 +120,27 @@ Op=Interaction_Tensor.reshape(N*params.volt_step,N*K)
 
 start_col=target_input_node*K
 end_col=(target_input_node+1)*K
-start_row=target_output_node*K
-end_row=(target_output_node+1)*K
+start_row=target_output_node*params.volt_step
+end_row=(target_output_node+1)*params.volt_step
 Op_focused=Op[start_row:end_row,start_col:end_col]
 
 max_op=np.max(np.abs(Op_focused))
 Op_normalized=Op_focused/max_op
 
+bias=model.val_lin.bias.detach().cpu().numpy()
+bias_col =bias.reshape(params.volt_step,1)
 
 H, W_mat = Op_normalized.shape
 ratios = [params.in_channels, 1, 2, 1]
-fig, axes = plt.subplots(figsize=(6,5))
-
+fig, axes = plt.subplots(1, 4, figsize=(12, 6), 
+                         sharey=False, # shareyはFalseにし、手動で制御します
+                         gridspec_kw={'width_ratios': ratios})
 
 
 sns.heatmap(Op_normalized,
-            ax=axes,
+            ax=axes[0],
             cmap="RdBu_r",
+            cbar_ax=axes[1],
             center=0,
             vmax=1,vmin=-1,
             cbar=True,
@@ -144,20 +150,25 @@ sns.heatmap(Op_normalized,
             cbar_kws={"label":"Coefficient Values (Normalized)"})
 
 # タイトルと軸ラベル
-axes.set_title(f"GNN Linear Operator -Value-")
-axes.set_ylabel(f"Output Feature (Node:{target_output_node+1})")
-axes.set_xlabel(f"Input Feature (Node:{target_input_node+1})")
+axes[0].set_title(f"GNN Linear Operator -Value-")
+axes[0].set_ylabel(f"Output Feature (Node:{target_output_node+1})")
+axes[0].set_xlabel(f"Input Feature (Node:{target_input_node+1})")
 
 step = 10 
 all_ticks = np.arange(W_mat)
 all_labels = [k+1 for k in range(W_mat)]
-axes.set_xticks(all_ticks[::step]+0.5)
-axes.set_xticklabels(all_labels[::step], rotation=0)
+axes[0].set_xticks(all_ticks[::step]+0.5)
+axes[0].set_xticklabels(all_labels[::step], rotation=0)
 
 all_ticks = np.arange(H)
 all_labels = [k+1 for k in range(H)]
-axes.set_yticks(all_ticks[::step]+0.5)
-axes.set_yticklabels(all_labels[::step], rotation=0)
+axes[0].set_yticks(all_ticks[::step]+0.5)
+axes[0].set_yticklabels(all_labels[::step], rotation=0)
+
+sns.heatmap(bias_col, ax=axes[2],cbar_ax=axes[3],cmap='viridis', cbar=True, annot=False)
+axes[2].set_title("Bias")
+axes[2].set_xticks([0.5])
+axes[2].set_xticklabels(["Const"], rotation=0)
 
 plt.tight_layout()
 plt.show()

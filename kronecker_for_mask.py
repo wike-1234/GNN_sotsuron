@@ -9,13 +9,22 @@ import torch.nn as nn
 from config import GlobalParams
 from utils.graph_utils import set_seed,hop_index,channel_edge_index
 from models.GNN_model import AttentionGCN
+
+plt.rcParams.update({
+    'font.size':11,
+    'axes.labelsize':11,
+    'xtick.labelsize':10,
+    'ytick.labelsize':10,
+    'legend.fontsize':10
+})
+
 #file指定
-pth_file="pth_path_mask10/model_dataset_path_mask_myGCN_seed42_mask10.pth"
-npz_file="data_data.dataset_path_mask_seed_42_mask10.npz"
+pth_file="pth_branch_mask10/model_dataset_branch_mask_myGCN_seed42_mask10.pth"
+npz_file="data_data.dataset_path_mask_seed_42_mask5.npz"
 seed=42
 
 #dataが多すぎるのでinput_nodeを絞る
-target_input_node=0
+target_input_node=26
 
 #loadするnpz指定
 save_dir="data/cache"
@@ -107,20 +116,22 @@ Op=Weighted_A.reshape(N,N*K)
 start_col=target_input_node*K
 end_col=(target_input_node+1)*K
 Op_focused_all=Op[:,start_col:end_col]
-Op_focused=Op_focused_all[:,::params.mask_ratio]
+Op_focused=Op_focused_all[:,::2]
 
-H, W_mat = Op_focused.shape
-plt.figure(figsize=(12,12))
-v_max=np.percentile(np.abs(Op_focused),99)
-ax=sns.heatmap(Op_focused,
+max_op=np.max(np.abs(Op_focused))
+Op_normalized=Op_focused/max_op
+
+H, W_mat = Op_normalized.shape
+plt.figure(figsize=(6,5))
+ax=sns.heatmap(Op_normalized,
                cmap="RdBu_r",
                center=0,
-               vmax=v_max,vmin=-v_max,
+               vmax=1,vmin=-1,
                cbar=True,
                square=False,
                linewidths=0.0,
                linecolor='lightgray',
-               cbar_kws={"label":"Coefficient Values"})
+               cbar_kws={"label":"Coefficient Values (Normalized)"})
 
 if "mask2" in pth_file:
     case=1
@@ -130,17 +141,20 @@ elif "mask10" in pth_file:
     case=3
 
 # タイトルと軸ラベル
-ax.set_title(f"GNN Linear Operator Visualization (Input Node:{target_input_node+1}) - (Case {case})", fontsize=14)
-ax.set_ylabel("Output Node Index", fontsize=12)
-ax.set_xlabel(f"Input Feature Index (Node:{target_input_node+1})", fontsize=12)
+ax.set_title(f"GNN Linear Operator -Attention- (Input Node:{target_input_node+1}) - Case {case}")
+ax.set_ylabel("Output Node")
+ax.set_xlabel(f"Input Feature (Node:{target_input_node+1})")
 
-# X軸ラベル: 特徴量(チャンネル)のインデックス
-ax.set_xticks(np.arange(W_mat) + 0.5)
-ax.set_xticklabels([f"Ch {k+1}" for k in range(W_mat)], rotation=45)
+step = 10 
+all_ticks = np.arange(W_mat)
+all_labels = [k+1 for k in range(W_mat)]
+ax.set_xticks(all_ticks[::step]+0.5)
+ax.set_xticklabels(all_labels[::step], rotation=0)
 
-# Y軸ラベル: 出力ノード番号 (数が多い場合は間引く)
-ax.set_yticks(np.arange(H) + 0.5)
-ax.set_yticklabels(np.arange(H)+1, rotation=0)
+all_ticks = np.arange(H)
+all_labels = [k+1 for k in range(H)]
+ax.set_yticks(all_ticks[::step]+0.5)
+ax.set_yticklabels(all_labels[::step], rotation=0)
 
 plt.tight_layout()
 plt.show()

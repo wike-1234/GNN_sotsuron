@@ -16,6 +16,14 @@ from config import GlobalParams
 from utils.graph_utils import hop_index, channel_edge_index,set_seed
 import dataset
 
+plt.rcParams.update({
+    'font.size':11,
+    'axes.labelsize':11,
+    'xtick.labelsize':10,
+    'ytick.labelsize':10,
+    'legend.fontsize':10
+})
+
 #--ファイル指定--
 npz_file="data_data.dataset_branch_seed_42_mask1.npz"
 pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
@@ -152,41 +160,39 @@ model.eval()
 
 #予測値vs教師データ
 def visualize_voltage_wave(model,test_loader,params):
-    #--特定のデータの電源vs予測値を比較--
     batch = next(iter(test_loader))
 
     with torch.no_grad():
-        # pred_val: 回帰予測値
         batch=batch.to(device)
         pred_val, _ ,_= model(batch.x, batch.edge_index, batch.batch,params)
-
     # 2. サンプルを選択 (例: バッチ内の 0番目のデータ)
     sample_idx = 0
 
-    # Tensor -> NumPy
     actual_data = batch.y[sample_idx].cpu().numpy()
     predicted_data = pred_val[sample_idx].cpu().numpy()
     target_node = batch.target_idx[sample_idx].item()
 
-    # 3. 棒グラフの準備
-    x = np.arange(1,len(actual_data)+1)  # X軸のラベル位置 (0, 1, 2, ...)
-    width = 0.35                     # 棒の太さ
+    x = np.arange(len(actual_data))  
+    width = 0.35                     
+    fig, ax = plt.subplots(figsize=(9, 6))
 
-    fig, ax = plt.subplots(figsize=(12, 6))
 
-    # 4. 棒を描画 (中心から少しずらして配置)
-    # 正解データ (左にずらす)
     rects1 = ax.bar(x - width/2, actual_data, width, label='Actual', color='royalblue')
-    # 予測データ (右にずらす)
     rects2 = ax.bar(x + width/2, predicted_data, width, label='Predicted', color='darkorange')
 
     # 5. ラベルやタイトルの設定
     ax.set_ylabel('Voltage')
     ax.set_xlabel('Step')
-    ax.set_title(f'Prediction Comparison (Target Node: {target_node})')
-    ax.set_xticks(x)             # 全ての目盛りを表示
-    ax.legend()                  # 凡例を表示
-    ax.grid(axis='y', linestyle='--', alpha=0.7) # 縦軸方向のグリッド線
+    ax.set_title(f'Prediction Comparison (Target Node: {target_node+1})')
+    #xlabel
+    step = 10 
+    all_ticks = np.arange(len(actual_data))
+    all_labels = [k for k in range(len(actual_data))]
+    ax.set_xticks(all_ticks[::step])
+    ax.set_xticklabels(all_labels[::step], rotation=0)      
+
+    ax.legend()                  
+    ax.grid(axis='y', linestyle='--', alpha=0.7) 
 
     plt.show()
 
@@ -212,8 +218,12 @@ def visualize_edge_weight(model,ch,params):
     #プロット
     plt.figure(figsize=(6,5))
     plt.imshow(A,cmap="coolwarm",vmin=-1,vmax=1)
-    plt.xticks(ticks=np.arange(N), labels=np.arange(1, N + 1))
-    plt.yticks(ticks=np.arange(N), labels=np.arange(1, N + 1))
+
+    step = 10 
+    all_ticks = np.arange(N)
+    all_labels = [k+1 for k in range(N)]
+    plt.xticks(all_ticks[::step],all_labels[::step], rotation=0)
+    plt.yticks(all_ticks[::step],all_labels[::step], rotation=0)
     plt.colorbar(label=f"Edge Weight(Channel{ch+1})")
     plt.xlabel("To node")
     plt.ylabel("From node")
@@ -241,17 +251,20 @@ def visualize_val_lin(model,params):
         val_weight=model.val_lin.weight.cpu().numpy()
         val_bias=model.val_lin.bias.cpu().numpy().flatten()
     #プロット
-    plt.figure(figsize=(10,8))
+    plt.figure(figsize=(6,5))
     sns.heatmap(val_weight,cmap="coolwarm",center=0,annot=False)
-    plt.xticks(ticks=np.arange(1,K+1),labels=np.arange(1,K+1))
-    plt.yticks(ticks=np.arange(K),labels=np.arange(0,K))
+    step = 10 
+    all_ticks = np.arange(K)
+    all_labels = [k+1 for k in range(K)]
+    plt.xticks(all_ticks[::step]+0.5,all_labels[::step], rotation=0)
+    plt.yticks(all_ticks[::step]+0.5,all_ticks[::step], rotation=0)
     plt.title("Value Linear Weight")
     plt.xlabel("In Channels")
     plt.ylabel("Steps")
     plt.show()
 
     plt.figure(figsize=(6,5))
-    x=np.arange(1,len(val_bias)+1)
+    x=np.arange(len(val_bias))
     plt.bar(x,val_bias)
     plt.title("Value Linear Bias")
     plt.xlabel("Steps")
@@ -370,11 +383,11 @@ def visualize_all_intermediate_representation(model,test_loader,params):
 
 
 
-#visualize_edge_weight(model,0,params)
-#visualize_edge_weight(model,1,params)
-#visualize_att_lin(model,params)
+visualize_edge_weight(model,0,params)
+visualize_edge_weight(model,1,params)
+visualize_att_lin(model,params)
 visualize_val_lin(model,params)
-#visualize_voltage_wave(model,test_loader,params)
-cul_acc_and_MSE(model,test_loader,params)
+visualize_voltage_wave(model,test_loader,params)
+#cul_acc_and_MSE(model,test_loader,params)
 #visualize_intermediate_representation(model,test_loader,params)
-visualize_all_intermediate_representation(model,test_loader,params)
+#visualize_all_intermediate_representation(model,test_loader,params)

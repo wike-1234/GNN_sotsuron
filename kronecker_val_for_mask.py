@@ -20,9 +20,8 @@ plt.rcParams.update({
 })
 
 #file指定
-pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
-#pth_file="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed17.pth"
-npz_file="data_data.dataset_path_seed_42_mask1.npz"
+pth_file="pth_branch_mask10/model_dataset_branch_mask_myGCN_seed42_mask10.pth"
+npz_file="data_data.dataset_branch_mask_seed_42_mask5.npz"
 seed=42
 
 #dataが多すぎるのでinput_nodeを絞る
@@ -109,6 +108,7 @@ with torch.no_grad():
 
 N=params.num_nodes
 K=params.in_channels
+V=params.volt_step
 
 A_stack=np.array([Adjacency_matrix[ch] for ch in range(params.in_channels)])
 Interaction_Tensor=np.einsum('kji,ok -> iojk',A_stack,W)
@@ -118,12 +118,14 @@ Op=Interaction_Tensor.reshape(N*params.volt_step,N*K)
 
 start_col=target_input_node*K
 end_col=(target_input_node+1)*K
-start_row=target_output_node*K
-end_row=(target_output_node+1)*K
-Op_focused=Op[start_row:end_row,start_col:end_col]
+start_row=target_output_node*V
+end_row=(target_output_node+1)*V
+Op_focused_all=Op[start_row:end_row,start_col:end_col]
+Op_focused=Op_focused_all[:,::2]
 
 max_op=np.max(np.abs(Op_focused))
 Op_normalized=Op_focused/max_op
+
 
 
 H, W_mat = Op_normalized.shape
@@ -143,8 +145,14 @@ sns.heatmap(Op_normalized,
             linecolor='lightgray',
             cbar_kws={"label":"Coefficient Values (Normalized)"})
 
+if "mask2" in pth_file:
+    case=1
+elif "mask5" in pth_file:
+    case=2
+elif "mask10" in pth_file:
+    case=3
 # タイトルと軸ラベル
-axes.set_title(f"GNN Linear Operator -Value-")
+axes.set_title(f"GNN Linear Operator -Value- (Case{case})")
 axes.set_ylabel(f"Output Feature (Node:{target_output_node+1})")
 axes.set_xlabel(f"Input Feature (Node:{target_input_node+1})")
 
