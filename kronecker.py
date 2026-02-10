@@ -20,7 +20,7 @@ plt.rcParams.update({
 
 #file指定
 pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
-#pth_file="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed17.pth"
+#pth_file="pth_compare/model_dataset_branch_myGCN_seed42_mask1_weight_seed5.pth"
 npz_file="data_data.dataset_branch_seed_42_mask1.npz"
 seed=42
 
@@ -135,7 +135,7 @@ ax=sns.heatmap(Op_normalized,
                cbar_kws={"label":"Coefficient Values (Normalized)"})
 
 # タイトルと軸ラベル
-ax.set_title(f"GNN Linear Operator -Attention- (Input Node:{target_input_node+1})")
+ax.set_title(f"GNN Linear Operator -Class- (Input Node:{target_input_node+1})")
 ax.set_ylabel("Output Node")
 ax.set_xlabel(f"Input Feature (Node:{target_input_node+1})")
 

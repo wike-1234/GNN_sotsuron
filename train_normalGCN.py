@@ -182,6 +182,7 @@ plt.yscale('log')
 plt.title("Loss Curve (Normal GNN)")
 plt.xlabel("epoch")
 plt.ylabel("loss")
+plt.ylim(1e-3,2)
 plt.legend()
 plt.grid(True, which="both", ls="--")
 plt.show()
@@ -193,6 +194,7 @@ plt.plot(test_acc_history,label='Test Accuracy')
 plt.title("Accuracy Curve (Normal GNN)")
 plt.xlabel("epoch")
 plt.ylabel("accuracy")
+plt.ylim(0,1.1)
 plt.legend()
 plt.show()
 plt.close()
@@ -206,11 +208,12 @@ plt.xlabel("epoch")
 plt.ylabel("MSE")
 plt.legend()
 plt.grid(True, which="both", ls="--")
+plt.ylim(1e-5,1)
 plt.show()
 plt.close()
 
 
-
+"""
 # 1. 保存ファイル名をデータセット名に基づいて自動生成
 # 例: params.load_file が "data.dataset1" なら "model_dataset1.pth" になる
 dataset_name = params.load_file.split('.')[-1] 
@@ -221,3 +224,4 @@ save_path = f'model_{dataset_name}_normalGCN_seed{params.seed}_mask{params.mask_
 torch.save(model.state_dict(), save_path)
 
 print(f"モデルの重みを {save_path} に保存しました。")
+"""

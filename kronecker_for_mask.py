@@ -17,9 +17,9 @@ plt.rcParams.update({
     'ytick.labelsize':10,
     'legend.fontsize':10
 })
-
+mask=2
 #file指定
-pth_file="pth_branch_mask10/model_dataset_branch_mask_myGCN_seed42_mask10.pth"
+pth_file=f"pth_branch_mask{mask}/model_dataset_branch_mask_myGCN_seed42_mask{mask}.pth"
 npz_file="data_data.dataset_path_mask_seed_42_mask5.npz"
 seed=42
 
@@ -141,7 +141,7 @@ elif "mask10" in pth_file:
     case=3
 
 # タイトルと軸ラベル
-ax.set_title(f"GNN Linear Operator -Attention- (Input Node:{target_input_node+1}) - Case {case}")
+ax.set_title(f"GNN Linear Operator -Class- (Input Node:{target_input_node+1}) - Case {case}")
 ax.set_ylabel("Output Node")
 ax.set_xlabel(f"Input Feature (Node:{target_input_node+1})")
 

@@ -20,8 +20,10 @@ plt.rcParams.update({
 })
 
 #file指定
-pth_file="pth_branch_mask10/model_dataset_branch_mask_myGCN_seed42_mask10.pth"
-npz_file="data_data.dataset_branch_mask_seed_42_mask5.npz"
+mask=2
+#file指定
+pth_file=f"pth_branch_mask{mask}/model_dataset_branch_mask_myGCN_seed42_mask{mask}.pth"
+npz_file="data_data.dataset_path_mask_seed_42_mask5.npz"
 seed=42
 
 #dataが多すぎるのでinput_nodeを絞る
@@ -152,7 +154,7 @@ elif "mask5" in pth_file:
 elif "mask10" in pth_file:
     case=3
 # タイトルと軸ラベル
-axes.set_title(f"GNN Linear Operator -Value- (Case{case})")
+axes.set_title(f"GNN Linear Operator -Regression- (Case{case})")
 axes.set_ylabel(f"Output Feature (Node:{target_output_node+1})")
 axes.set_xlabel(f"Input Feature (Node:{target_input_node+1})")
 

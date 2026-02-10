@@ -13,4 +13,4 @@ class GlobalParams:
     #回帰用lossとlabellossの割合
     lambda_balance=0.2 
     seed=42 #randomのシード
-    mask_ratio=2 #maskなしのときは1に
+    mask_ratio=5 #maskなしのときは1に

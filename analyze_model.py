@@ -25,8 +25,8 @@ plt.rcParams.update({
 })
 
 #--ファイル指定--
-npz_file="data_data.dataset_branch_seed_42_mask1.npz"
-pth_file="pth_branch/model_dataset_branch_myGCN_seed42_mask1.pth"
+npz_file="data_data.dataset_branch_mask_seed_42_mask2.npz"
+pth_file="pth_branch_mask10/model_dataset_branch_mask_myGCN_seed42_mask10.pth"
 seed=42
 
 #loadするnpz指定
@@ -237,16 +237,17 @@ def visualize_att_lin(model,params):
         att_bias=model.att_lin.bias.cpu().numpy().flatten()
     plt.figure(figsize=(6,5))
     plt.bar(x,att_weight)
-    plt.title("Attention Linear Weight")
+    plt.title("Classification Linear Weight")
     plt.xlabel("Channel")
     plt.ylabel("Weight")
     plt.show()
 
-    print("=== Attention Linear Bias ===")
+    print("=== Classification Linear Bias ===")
     print(att_bias)
 
 def visualize_val_lin(model,params):
     K=params.in_channels
+    S=params.volt_step
     with torch.no_grad():
         val_weight=model.val_lin.weight.cpu().numpy()
         val_bias=model.val_lin.bias.cpu().numpy().flatten()
@@ -255,10 +256,12 @@ def visualize_val_lin(model,params):
     sns.heatmap(val_weight,cmap="coolwarm",center=0,annot=False)
     step = 10 
     all_ticks = np.arange(K)
+    all_yticks=np.arange(S)
     all_labels = [k+1 for k in range(K)]
+    all_ylabels=[s+1 for s in range(S)]
     plt.xticks(all_ticks[::step]+0.5,all_labels[::step], rotation=0)
-    plt.yticks(all_ticks[::step]+0.5,all_ticks[::step], rotation=0)
-    plt.title("Value Linear Weight")
+    plt.yticks(all_yticks[::step]+0.5,all_ylabels[::step], rotation=0)
+    plt.title("Regression Linear Weight")
     plt.xlabel("In Channels")
     plt.ylabel("Steps")
     plt.show()
@@ -266,7 +269,7 @@ def visualize_val_lin(model,params):
     plt.figure(figsize=(6,5))
     x=np.arange(len(val_bias))
     plt.bar(x,val_bias)
-    plt.title("Value Linear Bias")
+    plt.title("Regression Linear Bias")
     plt.xlabel("Steps")
     plt.ylabel("Bias")
     plt.show()
@@ -383,10 +386,10 @@ def visualize_all_intermediate_representation(model,test_loader,params):
 
 
 
-visualize_edge_weight(model,0,params)
-visualize_edge_weight(model,1,params)
-visualize_att_lin(model,params)
-visualize_val_lin(model,params)
+#visualize_edge_weight(model,0,params)
+#visualize_edge_weight(model,1,params)
+#visualize_att_lin(model,params)
+#visualize_val_lin(model,params)
 visualize_voltage_wave(model,test_loader,params)
 #cul_acc_and_MSE(model,test_loader,params)
 #visualize_intermediate_representation(model,test_loader,params)

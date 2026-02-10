@@ -184,19 +184,22 @@ plt.figure()
 plt.plot(train_loss_history, label='Train Loss')
 plt.plot(test_loss_history, label='Test Loss')
 plt.yscale('log')
-plt.title("Loss Curve (My GNN)")
+plt.title("Loss Curve (Proposed GNN)")
 plt.xlabel("epoch")
 plt.ylabel("loss")
+plt.ylim(1e-3,2)
 plt.legend()
 plt.grid(True, which="both", ls="--")
+
 plt.show()
 #正答率
 plt.figure()
 plt.plot(train_acc_history,label='Train Accuracy')
 plt.plot(test_acc_history,label='Test Accuracy')
-plt.title("Accuracy Curve (My GNN)")
+plt.title("Accuracy Curve (Proposed GNN)")
 plt.xlabel("epoch")
 plt.ylabel("accuracy")
+plt.ylim(0,1.1)
 plt.legend()
 plt.show()
 #MSE
@@ -204,14 +207,15 @@ plt.figure()
 plt.plot(train_MSE_history, label='Train MSE')
 plt.plot(test_MSE_history, label='Test MSE')
 plt.yscale('log')
-plt.title("MSE Curve (My GNN)")
+plt.title("MSE Curve (Proposed GNN)")
 plt.xlabel("epoch")
 plt.ylabel("MSE")
+plt.ylim(1e-5,1)
 plt.legend()
 plt.grid(True, which="both", ls="--")
 plt.show()
 
-
+"""
 # 1. 保存ファイル名をデータセット名に基づいて自動生成
 # 例: params.load_file が "data.dataset1" なら "model_dataset1.pth" になる
 dataset_name = params.load_file.split('.')[-1] 
@@ -222,3 +226,4 @@ save_path = f'model_{dataset_name}_myGCN_seed{params.seed}_mask{params.mask_rati
 torch.save(model.state_dict(), save_path)
 
 print(f"モデルの重みを {save_path} に保存しました。")
+"""
